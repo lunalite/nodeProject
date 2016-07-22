@@ -49,5 +49,6 @@ Instead of using the default mongoose error handler, we'll use a custom one that
 
 We are releasing this error handler along with DELETE/PUT/GET/PUSH operations as release/1.1
 
-First, we'll configure it accordingly to: https://share.merck.com/display/APITEAM/API+Naming+Conventions
+Now, we'll configure the API accordingly to: https://share.merck.com/display/APITEAM/API+Naming+Conventions
 First, as part of the collection properties, we should have count and totalCount accordingingly. Let's program that.
+Thus, concludes our release/1.2

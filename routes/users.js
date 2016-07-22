@@ -7,17 +7,29 @@ var debug = require('debug')('nodeProject:server');
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
-    User.find(function (err, users) {
-        if (err) {
-            res.status(204).send(err);
-        } else {
-            res.json(users);
+    var countPerPage = req.query.limit;
+    var offset = req.query.offset;
+    User.find(
+        {},
+        function (err, users) {
+            if (err) {
+                res.status(204).send(err);
+            } else {
+                res.json({
+                    count: countPerPage,
+                    totalCount: users.length,
+                    _embedded: {
+                        user: users
+                    }
+                });
+            }
         }
-    });
+    )
+        .limit(parseInt(countPerPage, 10))
+        .skip(parseInt(offset, 10));
 });
 
 router.get('/:id', function (req, res, next) {
-    "use strict";
     User.findById(req.params.id, function (err, user) {
         if (err) {
             res.statusCode = 204;
