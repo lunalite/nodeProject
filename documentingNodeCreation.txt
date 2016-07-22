@@ -1,46 +1,53 @@
-After obtaining webstorm, create a nodeJS project with express generator, name of folder as nodeProject within the dir: ~\WebstormProjects\nodeProject
+*** Documenting a simple and brief guide of what I've done to understand and improve the API.
+*** Final objective is to have a working API that could be tested for security issues, etc.
+**We can include security tests (security test library?)
 
-According to:
-https://share.merck.com/display/APITEAM/Project+structure#Projectstructure-Foldersandfiles the project structure will be as such. Thus for now, we will rename app.js to index.js while refactoring it in webstorm.
+
+After obtaining webstorm trial from the website jetbrains, I created a nodeJS project with express-generator with name of folder as nodeProject within the dir: ~\WebstormProjects\nodeProject
+According to: https://share.merck.com/display/APITEAM/Project+structure#Projectstructure-Foldersandfiles the project structure will be as such. Thus for now, we will rename app.js to index.js while refactoring it in webstorm.
 For now, create the structure in ~\WebstormProjects\nodeProject to as follows:
 /
-  /bin
-	/node_modules
-	/public
-	/routes
-	/views
-  /config
-	/doc
-	/src
-	/test
-	/secret
-	index.js
-	package.json
-	
-For now, we'll press F6 in webstorm, running bin/www.js file. Otherwise, you could also open bash and change dir to the aforementioned folder, then input command:
+/bin
+/node_modules
+/public
+/routes
+/views
+/config
+/doc
+/src
+/test
+/secret
+index.js
+package.json
+
+For now, we'll press F6 in Webstorm, running the bin/www.js file.
+Otherwise, you could also open bash and change dir to the aforementioned folder, then input command:
 $ node bin/www 
-However, using bash will not show the debug message. You could test if this is working by going to browser > url: localhost:3000
-
-Next, I used postman to GET / and GET /users to test out the respond. So seeing that GET /users returns a message of 'respond with resource', we are going to change that to a HALSON instead.
-
-The model we are adopting will be from this particular site: https://github.com/seznam/halson Thus, go ahead and npm install halson --save
-
-You can test out the example on the github website with node REPL.
-
-now edit ~/routes/users.js adding in a halson object while replacing the the response to res.send(resource). (resource is the halson link)
+However, using bash will not show the debug message. You could test if this is working by going to browser >
+URL = localhost:3000
+Next, I used postman to GET / and GET /users to test out the respond. So seeing that GET /users returns a message of 'respond with resource', we are going to change that to a json instead since we can see that there was nothing wrong with the generated node.
 
 use POSTman to GET ~/users and you shold see the json reply.
-
 Now before we add individual id sites, we are going to connect via mongodb, so go and download it from https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/ and configure the basic settings. After you are done, run mongod.
-
-We are going to use mongoose as the package to connect between our API and MongoDB. Go and download http://mongoosejs.com/docs/
-
-Created a new model.js in model folder. Then added to config.js the configuration for mongodb and for the port that was initially within bin/www.js 
-
+We are going to use mongoose as the package to connect between our API and MongoDB. Go and download http://mongoosejs.com/docs/.
+Created a new model.js in model folder. Then added to config.js the configuration for mongodb and for the port that was initially within bin/www.js
 Connection for mongodb is done within bin/www.js, right when the nodeProject is run.
-
 Created userModel.js file in ~/model dir. Now I'm going to start with changing the routes for users.js while adding GET and POST request for creating a new user through the schema
+According to: https://share.merck.com/display/APITEAM/Error+Reporting+and+HTTP+status+codes. Added a status code for successful creation 201 and for failure of finding the object at 204
+You could follow this: https://scotch.io/tutorials/build-a-restful-api-using-node-and-express-4 for adding the POST PUT GET and DELETE, all adding to the users.js file.
 
+After all those, what I did was to push onto github, as a form of learning for git, to Release/1.0
+
+
+Now continuing with Release/1.1 today, we'll be adding more features as a major version.
+
+Firstly, we'll try to add in a error reporting function since it is very important.
+Added Winston JS for logging purposes
+We'll do it according to:
 https://share.merck.com/display/APITEAM/Error+Reporting+and+HTTP+status+codes
-Added a status code for successful creation 201 and for failure of finding the object at 204
-	
+Instead of using the default mongoose error handler, we'll use a custom one that creates a certain message and passing it onto the errorhandler that we'll be customising.
+
+We are releasing this error handler along with DELETE/PUT/GET/PUSH operations as release/1.1
+
+First, we'll configure it accordingly to: https://share.merck.com/display/APITEAM/API+Naming+Conventions
+First, as part of the collection properties, we should have count and totalCount accordingingly. Let's program that.
