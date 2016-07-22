@@ -1,72 +1,78 @@
+"use strict";
+
 var express = require('express');
 var router = express.Router();
-var halson = require('halson');
 var User = require('../model/userModel');
+var debug = require('debug')('nodeProject:server');
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
-  "use strict";
-  User.find(function(err, users) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.json(users);
-    }
-  });
-/*
-  var resource = halson({
-    title: "users",
-    description: "list of all the different users"
-  })
-    .addLink('self', '/users')
-    .addLink('next', '/users/:id');
-  res.send(resource);*/
+    User.find(function (err, users) {
+        if (err) {
+            res.status(204).send(err);
+        } else {
+            res.json(users);
+        }
+    });
 });
 
 router.get('/:id', function (req, res, next) {
-  "use strict";
-  User.findById(req.params.id, function(err, user) {
-    if (err) {
-      res.statusCode = 204;
-      console.error(err);
-      res.send();
-    } else {
-      res.send(user);
-    }
-  });
+    "use strict";
+    User.findById(req.params.id, function (err, user) {
+        if (err) {
+            res.statusCode = 204;
+            debug(err);
+            res.send();
+        } else {
+            res.send(user);
+        }
+    });
 });
 
 router.post('/', function (req, res, next) {
-  "use strict";
-  var user = new User({userName:req.body.userName});
-  console.log(user);
-  user.save(function(err) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.statusCode = 201;
-      res.send(user);
-    }
-  });
+    var user = new User({userName: req.body.userName, phoneNumber: req.body.phoneNumber});
+    debug("Post: " + user);
+    user.save(function (err) {
+        if (err) {
+            res.statusCode = 400;
+            next(err);
+        } else {
+            res.status(201).send(user);
+        }
+    });
 });
 
 router.put('/:id', function (req, res, next) {
-  "use strict";
-  User.findById(req.params.id, function(err, user) {
-    if (err) {
-      res.statusCode = 204;
-      console.error(err);
-    } else {
-      user.userName = req.body.userName;
-      user.save(function(err) {
+    User.findById(req.params.id, function (err, user) {
         if (err) {
-          console.error(err);
+            res.status(204).send(err);
         } else {
-          res.json(user);
+            user.userName = req.body.userName;
+            user.phoneNumber = req.body.phoneNumber;
+            user.save(function (err) {
+                if (err) {
+                    res.statusCode = 400;
+                    next(err);
+                } else {
+                    res.json(user);
+                }
+            });
         }
-      });
-    }
-  });
+    });
 });
+
+router.delete('/:id', function (req, res, next) {
+    User.remove({
+        _id: req.params.id
+    }, function (err, user) {
+        if (err) {
+            res.status(204).send(err);
+        } else {
+            res.status(204).send();
+            debug("DELETE " + user);
+        }
+    });
+});
+
 
 module.exports = router;

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+"use strict";
+
 /**
  * Module dependencies.
  */
@@ -11,16 +13,16 @@ var mongoose = require('mongoose');
 
 /**
  * Setting up the mongodb connection
-  */
-mongoose.connect(config.db, function(err){
-  "use strict";
-  if (err) {
-    //throw err;
-    console.log(err);
-  }
+ */
+mongoose.connect(config.db, function (err) {
+    "use strict";
+    if (err) {
+        //throw err;
+        console.log(err);
+    }
 });
 
-debug('connected to the database: '+config.db);
+debug('connected to the database: ' + config.db);
 
 // Switching debug mode on
 mongoose.set('debug', true);
@@ -52,20 +54,20 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-  //parseInt variable val to decimal system
-  var port = parseInt(val, 10);
+    //parseInt variable val to decimal system
+    var port = parseInt(val, 10);
 
-  if (isNaN(port)) {
-    // named pipe in string thus, NaN
-    return val;
-  }
+    if (isNaN(port)) {
+        // named pipe in string thus, NaN
+        return val;
+    }
 
-  if (port >= 0) {
-    // port number
-    return port;
-  }
+    if (port >= 0) {
+        // port number
+        return port;
+    }
 
-  return false;
+    return false;
 }
 
 /**
@@ -73,27 +75,27 @@ function normalizePort(val) {
  */
 
 function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+    var bind = typeof port === 'string'
+        ? 'Pipe ' + port
+        : 'Port ' + port;
 
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
 }
 
 /**
@@ -101,9 +103,9 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+    var addr = server.address();
+    var bind = typeof addr === 'string'
+        ? 'pipe ' + addr
+        : 'port ' + addr.port;
+    debug('Listening on ' + bind);
 }
