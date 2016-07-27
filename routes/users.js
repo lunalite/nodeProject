@@ -16,6 +16,18 @@ router.get('/', function (req, res, next) {
                 res.status(204).send(err);
             } else {
                 res.json({
+                    _links: {
+                        self: {
+                            href: "/users"
+                        },
+                        next: {
+                            href: "/users/:_id"
+                        }
+                    },
+                    find: {
+                        // TODO: implement find function
+                        href: ""
+                    },
                     count: countPerPage,
                     totalCount: users.length,
                     _embedded: {
@@ -85,6 +97,5 @@ router.delete('/:id', function (req, res, next) {
         }
     });
 });
-
 
 module.exports = router;

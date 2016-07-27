@@ -30,22 +30,6 @@ var UserSchema = new mongoose.Schema({
     }
 }, { versionKey: false });
 
-/*
- ** This pre-hook will assert incoming requests and send an error if its not valid.
- *//*
- UserSchema.pre('save', function (next) {
- "use strict";
- var self = this;
- var errJson = {"error": []};
-
- if (this.phone === 'undefined') {
- errJson.error.push("missingPhone");
- }
-
- debug(JSON.stringify(errJson));
- //var err = new Error('userSchemaError');
- //next(err);
- });*/
 var User = mongoose.model('User', UserSchema);
 
 module.exports = User;

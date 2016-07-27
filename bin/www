@@ -6,7 +6,7 @@
  * Module dependencies.
  */
 var config = require('../config/config');
-var app = require('../index');
+var app = require('../app');
 var debug = require('debug')('nodeProject:server');
 var http = require('http');
 var mongoose = require('mongoose');
@@ -15,7 +15,6 @@ var mongoose = require('mongoose');
  * Setting up the mongodb connection
  */
 mongoose.connect(config.db, function (err) {
-    "use strict";
     if (err) {
         //throw err;
         console.log(err);
