@@ -65,6 +65,8 @@ Before that, to know what should be tested, we should try using istanbul to see 
 Release/1.4
 Let's continue with the unfinished test case.
 
+Release/1.5
+
 //Today, we're gonna try and configure Jenkins on our own environment for CI of the app, such that every time we do a certain task, it will be automatically pushed to github.
 
 

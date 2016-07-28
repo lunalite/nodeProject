@@ -35,6 +35,9 @@ before(function (done) {
     }
 });
 
+/*
+** Start of Tests
+ */
 describe('HTTP requests', function () {
     describe('GET /', function () {
         it('should respond with hal format\n', function (done) {
@@ -86,18 +89,7 @@ describe('HTTP requests', function () {
 
     describe('GET /users/:id', function () {
         it('should respond with posted user\n', function (done) {
-            function userIdQuery(callback) {
-                User.findOne({userName: "test-Name"})
-                    .exec(function (err, user) {
-                        if (err) {
-                            callback(err, null);
-                        } else {
-                            callback(null, user._id);
-                        }
-                    });
-            }
-
-            userIdQuery(function (err, data) {
+            userIdQuery("test-Name", function (err, data) {
                 if (err) {
                     return done(err);
                 } else {
@@ -117,18 +109,7 @@ describe('HTTP requests', function () {
 
     describe('PUT /users', function () {
         it('should update the posted user\n', function (done) {
-            function userIdQuery(callback) {
-                User.findOne({userName: "test-Name"})
-                    .exec(function (err, user) {
-                        if (err) {
-                            callback(err, null);
-                        } else {
-                            callback(null, user._id);
-                        }
-                    });
-            }
-
-            userIdQuery(function (err, data) {
+            userIdQuery("testNamePut", function (err, data) {
                 if (err) {
                     return done(err);
                 } else {
@@ -151,36 +132,28 @@ describe('HTTP requests', function () {
     });
 
     describe('DELETE /users/:id', function () {
-        it('should delete the posted users\n', function (done) {
-            function userIdQuery(callback) {
-                User.findOne({userName: "Felicia"})
-                    .exec(function (err, user) {
-                        if (err) {
-                            callback(err, null);
-                        } else {
-                            callback(null, user._id);
-                        }
-                    });
-            }
-
-            userIdQuery(function (err, data) {
+        var deletedId;
+        it('should delete the posted users', function (done) {
+            userIdQuery("testNameDelete", function (err, data) {
                 if (err) {
                     return done(err);
                 } else {
+                    deletedId = data;
                     return request(app)
-                        .put('/users/' + data)
-                        .send({
-                            userName: "Felicia",
-                            phoneNumber: 99998888
-                        })
-                        .expect('Content-Type', /json/)
-                        .expect(function (res) {
-                            res.body._links.self.href.should.equal("/users/" + data, "_links/self/href is wrong");
-                            res.body.user.userName.should.equal("Felicia", "userName is wrong");
-                            res.body.user.phoneNumber.should.equal(99998888, "phoneNumber is wrong");
-                        })
-                        .expect(200, done);
+                        .delete('/users/' + data)
+                        .expect(204, done);
                 }
+            });
+        })
+        it('should not be able to GET the user\n', function(done) {
+            userIdQuery("testNameDelete", function(err, data) {
+               if (err) {
+                   return done(err);
+               } else {
+                   return request(app)
+                       .get('/users/' + deletedId)
+                       .expect(200, done);
+               }
             });
         })
     });
@@ -204,3 +177,18 @@ describe('Users: models', function () {
     });
 });
 
+/*
+** Functions to increase code readability
+ */
+function userIdQuery(_userName, callback) {
+    User.findOne({userName: _userName})
+        .exec(function (err, user) {
+            if (err) {
+                callback(err, null);
+            } else if (user == null) {
+                callback(null, null);
+            } else {
+                callback(null, user._id);
+            }
+        });
+}
