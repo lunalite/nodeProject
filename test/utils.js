@@ -5,13 +5,14 @@ var config = require('../config/config');
 
 process.env.NODE_ENV = 'test';
 
-before(function(done) {
+before(function (done) {
     console.log("Starting unit test...");
-    console.log("Connecting to database node environment: "+ process.env.NODE_ENV + " at "+ config.db);
+    console.log("Connecting to database node environment: " + process.env.NODE_ENV + " at " + config.db);
     function clearDB() {
         for (var i in mongoose.connection.collections) {
-            console.log("remove mongoose collections..");
-            mongoose.connection.collections[i].remove(function() {});
+            console.log("remove mongoose collections...\n");
+            mongoose.connection.collections[i].remove(function () {
+            });
         }
         return done();
     }
@@ -31,6 +32,7 @@ before(function(done) {
 });
 
 after(function (done) {
+    console.log("Test is done. Disconnecting from " + config.db);
     mongoose.disconnect();
     return done();
 });

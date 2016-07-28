@@ -54,17 +54,16 @@ First, as part of the collection properties, we should have count and totalCount
 Thus, concludes our release/1.2
 
 Release/1.3
-Added versioning
-
 Today, we are going to try and include test cases, simple ones according to the guides online. But first, we'll try it out ourselves and see how it goes.
 https://www.sitepoint.com/unit-test-javascript-mocha-chai/
 We are gonna follow the instructions here, using mocha and chai. As well as using supertest https://github.com/visionmedia/supertest
 Deleted versioning. Too troublesome.
 http://www.scotchmedia.com/tutorials/express/authentication/1/06 for testing of mongoose connection to dB
 We'll be trying first, the connection to dB and that every commands are as they should be. Basic tests is up. Time to push.
+Before that, to know what should be tested, we should try using istanbul to see if code is covered by the test cases. Istanbul isn't that great either.
 
-
-Before that, to know what should be tested, we should try using istanbul to see if code is covered by the test cases.
+Release/1.4
+Let's continue with the unfinished test case.
 
 //Today, we're gonna try and configure Jenkins on our own environment for CI of the app, such that every time we do a certain task, it will be automatically pushed to github.
 
