@@ -61,7 +61,12 @@ router.get('/:id', function (req, res, next) {
 });
 
 router.post('/', function (req, res, next) {
-    var user = new User({userName: req.body.userName, phoneNumber: req.body.phoneNumber});
+    var user = new User({
+        userName: req.body.userName,
+        phoneNumber: req.body.phoneNumber,
+        //TODO make password request hidden
+        password: req.body.password
+    });
     debug("Post: " + user);
     user.save(function (err) {
         if (err) {

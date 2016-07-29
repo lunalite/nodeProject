@@ -8,7 +8,10 @@ router.get('/', function (req, res, next) {
     res.json({
         _links: {
             self: "/",
-            next: "/users"
+            next: [
+                "/users",
+                "/login"
+            ]
         }
     });
 });

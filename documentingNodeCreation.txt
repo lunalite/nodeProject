@@ -66,6 +66,11 @@ Release/1.4
 Let's continue with the unfinished test case.
 
 Release/1.5
+We'll be implementing security in this version.
+https://scotch.io/tutorials/implement-oauth-into-your-express-koa-or-hapi-applications-using-grant
+https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens --> more impt
+http://passportjs.org/ --> easier module to use 
+Changed userSchema to that with password. But passwords being saved in clear text. Have to use crypto module to hide it later.
 
 //Today, we're gonna try and configure Jenkins on our own environment for CI of the app, such that every time we do a certain task, it will be automatically pushed to github.
 
