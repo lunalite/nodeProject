@@ -3,7 +3,14 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../model/userModel');
+var SessionHandler = require('./session');
+var sessionHandler = new SessionHandler();
+var isLoggedIn = sessionHandler.isLoggedInMiddleware;
 var debug = require('debug')('nodeProject:server');
+
+router.use('/', isLoggedIn, function(req, res, next) {
+    debug('User is authenticated at /users: ' + req.isAuthenticated());
+});
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {

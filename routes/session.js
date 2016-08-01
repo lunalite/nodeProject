@@ -1,14 +1,14 @@
 "use strict";
+var debug = require('debug')('nodeProject:server');
 
-function sessionHandler(db) {
+function SessionHandler() {
 
     this.isLoggedInMiddleware = function(req, res, next){
         if (req.isAuthenticated()) {
-            return next;
+            return next();
         }
-
-        res.redirect('/');
+        res.redirect('/login');
     };
 }
 
-module.exports = sessionHandler;
+module.exports = SessionHandler;

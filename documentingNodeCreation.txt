@@ -75,7 +75,7 @@ Adding according to http://passportjs.org/docs documentation. Gonna be using ses
 
 Added a session.js for handling session and checking if user is logged in, authenticated, etc. everything to do with sessions and cookies (Will not be updated for now until later releases)
 
-Let's try hacking through
+Let's try adding cookies and encryption to password
 
 
 //Today, we're gonna try and configure Jenkins on our own environment for CI of the app, such that every time we do a certain task, it will be automatically pushed to github.
