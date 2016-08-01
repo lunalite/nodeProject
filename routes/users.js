@@ -48,7 +48,14 @@ router.get('/:id', function (req, res, next) {
             debug(err);
             res.send();
         } else {
-            res.send(user);
+            res.json({
+                _links: {
+                    self: {
+                        href: "/users/" + req.params.id
+                    }
+                },
+                user: user
+            });
         }
     });
 });
@@ -78,7 +85,14 @@ router.put('/:id', function (req, res, next) {
                     res.statusCode = 400;
                     next(err);
                 } else {
-                    res.json(user);
+                    res.json({
+                        _links: {
+                            self: {
+                                href: "/users/"+req.params.id
+                            }
+                        },
+                        user: user
+                    });
                 }
             });
         }

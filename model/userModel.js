@@ -9,7 +9,7 @@ var UserSchema = new mongoose.Schema({
         required: [true, 'emptyUserName'],
         validate: {
             validator: function (v) {
-                return (/[a-zA-Z]{0,10}/).test(v);
+                return (/[a-zA-Z]{0,20}/).test(v);
             },
             message: "invalidUserName"
         }
