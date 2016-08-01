@@ -70,7 +70,13 @@ We'll be implementing security in this version.
 https://scotch.io/tutorials/implement-oauth-into-your-express-koa-or-hapi-applications-using-grant
 https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens --> more impt
 http://passportjs.org/ --> easier module to use 
-Changed userSchema to that with password. But passwords being saved in clear text. Have to use crypto module to hide it later.
+Changed userSchema to that with password. But passwords being saved in clear text. Have to use crypto module to hide it later. 
+Adding according to http://passportjs.org/docs documentation. Gonna be using sessions and cookies i.e. express session for storing of cookies for authentication.
+
+Added a session.js for handling session and checking if user is logged in, authenticated, etc. everything to do with sessions and cookies (Will not be updated for now until later releases)
+
+Let's try hacking through
+
 
 //Today, we're gonna try and configure Jenkins on our own environment for CI of the app, such that every time we do a certain task, it will be automatically pushed to github.
 
