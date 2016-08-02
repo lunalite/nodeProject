@@ -2,15 +2,16 @@
 
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-var User = require('../model/userModel');
+var BearerStrategy = require('passport-http-bearer').Strategy;
+var Users = require('../model/userModel');
 var debug = require('debug')('nodeProject:server');
 
 passport.use(new LocalStrategy({
         passReqToCallback: true
     },
     function (req, username, password, done) {
-        User.findOne({userName: username}, function (err, user) {
-            console.log(user);
+        Users.findOne({userName: username}, function (err, user) {
+//            console.log(user);
             if (err) {
                 debug("Error with finding user in database");
                 return done(err);
@@ -24,7 +25,24 @@ passport.use(new LocalStrategy({
                 debug('incorrect password');
                 return done(null, false, {message: 'Incorrect password.'});
             }
+            debug("Logging in success");
             return done(null, user);
+        });
+    }
+));
+
+passport.use(new BearerStrategy(
+    function(token, done) {
+        Users.findOne({ token: token }, function (err, user) {
+            if (err) {
+                debug("Error with finding user in database");
+                return done(err);
+            }
+            if (!user) {
+                debug('incorrect username');
+                return done(null, false);
+            }
+            return done(null, user, { scope: 'read' });
         });
     }
 ));
@@ -34,9 +52,10 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (_id, done) {
-    User.findById(_id, function (err, user) {
+    Users.findById(_id, function (err, user) {
         done(err, user);
     });
 });
+
 
 module.exports = passport;

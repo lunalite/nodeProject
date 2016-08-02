@@ -2,14 +2,12 @@
 
 var express = require('express');
 var router = express.Router();
-var SessionHandler = require('./session');
-var sessionHandler = new SessionHandler();
-var isLoggedIn = sessionHandler.isLoggedInMiddleware;
+var isLoggedIn = require('./session').isLoggedInMiddleware;
 var debug = require('debug')('nodeProject:server');
+var passport = require('../config/passport');
 
 /* GET home page. */
-router.get('/' , isLoggedIn, function (req, res, next) {
-    debug('user is authenticated at / page: '+ req.isAuthenticated());
+router.get('/', isLoggedIn, function (req, res, next) {
     res.json({
         _links: {
             self: "/",

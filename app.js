@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express');
+var morgan = require('morgan');
 var session = require('express-session');
 var config = require('./config/config');
 var path = require('path');
@@ -36,6 +37,8 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(morgan('dev'));
 
 app.use('/', routes);
 app.use('/users', users);
