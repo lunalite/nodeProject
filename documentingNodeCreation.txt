@@ -66,6 +66,20 @@ Release/1.4
 Let's continue with the unfinished test case.
 
 Release/1.5
+We'll be implementing security in this version.
+https://scotch.io/tutorials/implement-oauth-into-your-express-koa-or-hapi-applications-using-grant
+https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens --> more impt
+http://passportjs.org/ --> easier module to use 
+Changed userSchema to that with password. But passwords being saved in clear text. Have to use crypto module to hide it later. 
+Adding according to http://passportjs.org/docs documentation. Gonna be using sessions and cookies i.e. express session for storing of cookies for authentication.
+
+Added a session.js for handling session and checking if user is logged in, authenticated, etc. everything to do with sessions and cookies (Will not be updated for now until later releases)
+Other than local strategy, there is http-bearer strategy and OAuth2rize modules being installed that will help create the OAuth system.
+Instead of installing those, I decided to find some other authentication system as it is not efficient to have a OAuth2 implemented for both server and client side.
+Thus, I've implemented the JWT system that provides a token that could be used as http-bearer strategy. We are gonna be using that alongside the local strategy
+Let's try adding cookies and encryption to password.
+
+
 
 //Today, we're gonna try and configure Jenkins on our own environment for CI of the app, such that every time we do a certain task, it will be automatically pushed to github.
 

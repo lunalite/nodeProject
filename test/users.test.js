@@ -12,15 +12,18 @@ before(function (done) {
 
     var userArray = [{
         userName: "testName",
+        password: "qwe123QWE",
         phoneNumber: 99664433
     }, {
         userName: "testNamePut",
+        password: "qwe123QWE",
         phoneNumber: 11223344
     }, {
         userName: "testNameDelete",
+        password: "qwe123QWE",
         phoneNumber: 22331122
     }];
-
+console.log(userArray);
     User.create(userArray, function (err, createdUsers) {
         if (err) {
             return preTestComplete(err);

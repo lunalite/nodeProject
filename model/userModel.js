@@ -14,6 +14,19 @@ var UserSchema = new mongoose.Schema({
             message: "invalidUserName"
         }
     },
+    token: {
+      type: String
+    },
+    password: {
+        type: String,
+        required: [true, 'emptyPassword'],
+        validate: {
+            validator: function (v) {
+                return (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/).test(v);
+            },
+            message: "invalidPassword"
+        }
+    },
     phoneNumber: {
         type: Number,
         required: [true, 'emptyPhoneNumber'],
@@ -24,12 +37,15 @@ var UserSchema = new mongoose.Schema({
             message: "invalidPhoneNumber"
         }
     },
+    isAdmin: {
+        type: Boolean
+    },
     timeCreated: {
         type: Date,
         default: Date.now
     }
-}, { versionKey: false });
+}, {versionKey: false});
 
-var User = mongoose.model('User', UserSchema);
+var Users = mongoose.model('Users', UserSchema);
 
-module.exports = User;
+module.exports = Users;

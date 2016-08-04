@@ -2,14 +2,22 @@
 
 var express = require('express');
 var router = express.Router();
-var User = require('../model/userModel');
+var Users = require('../model/userModel');
+var isLoggedIn = require('./session').isLoggedInMiddleware;
 var debug = require('debug')('nodeProject:server');
+
+
+router.use('/', isLoggedIn, function (req, res, next) {
+    debug('User is authenticated at /users: ' + req.isAuthenticated());
+    next();
+});
+
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
     var countPerPage = req.query.limit;
     var offset = req.query.offset;
-    User.find(
+    Users.find(
         {},
         function (err, users) {
             if (err) {
@@ -42,7 +50,7 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/:id', function (req, res, next) {
-    User.findById(req.params.id, function (err, user) {
+    Users.findById(req.params.id, function (err, user) {
         if (err) {
             res.statusCode = 204;
             debug(err);
@@ -61,7 +69,12 @@ router.get('/:id', function (req, res, next) {
 });
 
 router.post('/', function (req, res, next) {
-    var user = new User({userName: req.body.userName, phoneNumber: req.body.phoneNumber});
+    var user = new Users({
+        userName: req.body.userName,
+        phoneNumber: req.body.phoneNumber,
+        //TODO make password request hidden
+        password: req.body.password
+    });
     debug("Post: " + user);
     user.save(function (err) {
         if (err) {
@@ -74,7 +87,7 @@ router.post('/', function (req, res, next) {
 });
 
 router.put('/:id', function (req, res, next) {
-    User.findById(req.params.id, function (err, user) {
+    Users.findById(req.params.id, function (err, user) {
         if (err) {
             res.status(204).send(err);
         } else {
@@ -88,7 +101,7 @@ router.put('/:id', function (req, res, next) {
                     res.json({
                         _links: {
                             self: {
-                                href: "/users/"+req.params.id
+                                href: "/users/" + req.params.id
                             }
                         },
                         user: user
@@ -100,7 +113,7 @@ router.put('/:id', function (req, res, next) {
 });
 
 router.delete('/:id', function (req, res, next) {
-    User.remove({
+    Users.remove({
         _id: req.params.id
     }, function (err, user) {
         if (err) {
