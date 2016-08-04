@@ -2,10 +2,12 @@
 
 var request = require('supertest');
 var assert = require('chai').assert;
+var expect = require('chai').expect;
 var app = require('../app');
 var utils = require('./utils');
 var should = require('should');
 var User = require('../model/userModel');
+var authenticationHook = [false,false];
 
 before(function (done) {
     console.log("\nRunning pre-test configuration...\n");
@@ -23,7 +25,7 @@ before(function (done) {
         password: "qwe123QWE",
         phoneNumber: 22331122
     }];
-console.log(userArray);
+    console.log(userArray);
     User.create(userArray, function (err, createdUsers) {
         if (err) {
             return preTestComplete(err);
@@ -39,8 +41,42 @@ console.log(userArray);
 });
 
 /*
-** Start of Tests
+ ** Start of Tests
  */
+describe('Unauthenticated user cannot visit any sites', function (done) {
+    it('GET / should lead to /login page', function (done) {
+        request(app)
+            .get('/')
+            .expect(function (res) {
+                expect(res.header['location']).to.match(/\/login/);
+            })
+            .expect(302)
+            .end(function (err, res) {
+                if (err) {
+                    authenticationHook[0] = "fail";
+                    return done(err);
+                }
+                authenticationHook[0] = true;
+                done();
+            });
+    });
+    it('GET /users should lead to /login page', function (done) {
+        request(app)
+            .get('/users')
+            .expect(function (res) {
+                expect(res.header['location']).to.match(/\/login/);
+            })
+            .end(function (err, res) {
+                if (err) {
+                    authenticationHook[1] = "fail";
+                    return done(err);
+                }
+                authenticationHook[1] = true;
+                done();
+            });
+    });
+});
+
 describe('HTTP requests', function () {
     describe('GET /', function () {
         it('should respond with hal format\n', function (done) {
@@ -61,7 +97,7 @@ describe('HTTP requests', function () {
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200, done);
-        })
+        });
         it('should contain the right HAL format\n', function (done) {
             request(app)
                 .get('/users')
@@ -74,7 +110,7 @@ describe('HTTP requests', function () {
                     //TODO add more
                 })
                 .end(done);
-        })
+        });
     });
 
 
@@ -87,7 +123,7 @@ describe('HTTP requests', function () {
                     phoneNumber: 12345678
                 })
                 .expect(201, done);
-        })
+        });
     });
 
     describe('GET /users/:id', function () {
@@ -107,7 +143,7 @@ describe('HTTP requests', function () {
                         .expect(200, done);
                 }
             });
-        })
+        });
     });
 
     describe('PUT /users', function () {
@@ -131,7 +167,7 @@ describe('HTTP requests', function () {
                         .expect(200, done);
                 }
             });
-        })
+        });
     });
 
     describe('DELETE /users/:id', function () {
@@ -147,18 +183,18 @@ describe('HTTP requests', function () {
                         .expect(204, done);
                 }
             });
-        })
-        it('should not be able to GET the user\n', function(done) {
-            userIdQuery("testNameDelete", function(err, data) {
-               if (err) {
-                   return done(err);
-               } else {
-                   return request(app)
-                       .get('/users/' + deletedId)
-                       .expect(200, done);
-               }
+        });
+        it('should not be able to GET the user\n', function (done) {
+            userIdQuery("testNameDelete", function (err, data) {
+                if (err) {
+                    return done(err);
+                } else {
+                    return request(app)
+                        .get('/users/' + deletedId)
+                        .expect(200, done);
+                }
             });
-        })
+        });
     });
 });
 
@@ -181,7 +217,7 @@ describe('Users: models', function () {
 });
 
 /*
-** Functions to increase code readability
+ ** Functions to increase code readability
  */
 function userIdQuery(_userName, callback) {
     User.findOne({userName: _userName})
