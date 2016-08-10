@@ -97,11 +97,6 @@ describe('Authenticated userTest', function () {
             .end(done);
     });
 
-    /*    it('should give me a defined token', function(done) {
-     console.log("token is " + token);
-     done();
-     });
-     */
     describe('HTTP requests', function () {
         describe('GET /', function () {
             it('should respond with hal format\n', function (done) {
@@ -148,8 +143,10 @@ describe('Authenticated userTest', function () {
             request(app)
                 .post('/users')
                 .set('authorization', 'bearer ' + token)
+                .type('json')
                 .send({
                     userName: "test-Name",
+                    password: "test123TEST",
                     phoneNumber: 12345678
                 })
                 .expect(201, done);
@@ -170,93 +167,87 @@ describe('Authenticated userTest', function () {
                             res.body._links.self.href.should.equal("/users/" + data, "_links/self/href is wrong");
                             res.body.user.userName.should.equal("test-Name", "userName is wrong");
                             res.body.user.phoneNumber.should.equal(12345678, "phoneNumber is wrong");
+                            res.body.user.password.should.equal("test123TEST", "password is wrong");
                         })
                         .expect(200, done);
                 }
             });
         });
     });
-});
 
+    describe('PUT /users', function () {
+        it('should update the posted user\n', function (done) {
+            userIdQuery("testNamePut", function (err, data) {
+                if (err) {
+                    return done(err);
+                } else {
+                    return request(app)
+                        .put('/users/' + data)
+                        .set('authorization', 'bearer ' + token)
+                        .type('json')
+                        .send({
+                            userName: "Felicia",
+                            phoneNumber: 99998888
+                        })
+                        .expect('Content-Type', /json/)
+                        .expect(function (res) {
+                            res.body._links.self.href.should.equal("/users/" + data, "_links/self/href is wrong");
+                            res.body.user.userName.should.equal("Felicia", "userName is wrong");
+                            res.body.user.phoneNumber.should.equal(99998888, "phoneNumber is wrong");
+                        })
+                        .expect(200, done);
+                }
+            });
+        });
+    });
+
+    describe('DELETE /users/:id', function () {
+        var deletedId;
+        it('should delete the posted users', function (done) {
+            userIdQuery("testNameDelete", function (err, data) {
+                if (err) {
+                    return done(err);
+                } else {
+                    deletedId = data;
+                    return request(app)
+                        .delete('/users/' + data)
+                        .set('authorization', 'bearer ' + token)
+                        .expect(204, done);
+                }
+            });
+        });
+        it('should not be able to GET the user\n', function (done) {
+            userIdQuery("testNameDelete", function (err, data) {
+                if (err) {
+                    return done(err);
+                } else {
+                    return request(app)
+                        .get('/users/' + deletedId)
+                        .set('authorization', 'bearer ' + token)
+                        .expect(200, done);
+                }
+            });
+        });
+    });
 /*
+    describe('Users: models', function () {
+        describe('#create()', function () {
+            it('should create a new User\n', function (done) {
+                var user = {
+                    userName: 'test Name',
+                    phoneNumber: 99664433
+                };
+                User.create(user, function (err, createdUser) {
+                    should.not.exist(err);
+                    createdUser.userName.should.equal('test Name');
+                    createdUser.phoneNumber.should.equal(99664433);
+                    done();
+                });
+            });
+        });
+    });*/
 
-
-
-
-
-
-
- describe('PUT /users', function () {
- it('should update the posted user\n', function (done) {
- userIdQuery("testNamePut", function (err, data) {
- if (err) {
- return done(err);
- } else {
- return request(app)
- .put('/users/' + data)
- .send({
- userName: "Felicia",
- phoneNumber: 99998888
- })
- .expect('Content-Type', /json/)
- .expect(function (res) {
- res.body._links.self.href.should.equal("/users/" + data, "_links/self/href is wrong");
- res.body.user.userName.should.equal("Felicia", "userName is wrong");
- res.body.user.phoneNumber.should.equal(99998888, "phoneNumber is wrong");
- })
- .expect(200, done);
- }
- });
- });
- });
-
- describe('DELETE /users/:id', function () {
- var deletedId;
- it('should delete the posted users', function (done) {
- userIdQuery("testNameDelete", function (err, data) {
- if (err) {
- return done(err);
- } else {
- deletedId = data;
- return request(app)
- .delete('/users/' + data)
- .expect(204, done);
- }
- });
- });
- it('should not be able to GET the user\n', function (done) {
- userIdQuery("testNameDelete", function (err, data) {
- if (err) {
- return done(err);
- } else {
- return request(app)
- .get('/users/' + deletedId)
- .expect(200, done);
- }
- });
- });
- });
- });
-
-
- describe('Users: models', function () {
- describe('#create()', function () {
- it('should create a new User\n', function (done) {
- var user = {
- userName: 'test Name',
- phoneNumber: 99664433
- };
- User.create(user, function (err, createdUser) {
- should.not.exist(err);
- createdUser.userName.should.equal('test Name');
- createdUser.phoneNumber.should.equal(99664433);
- done();
- });
- });
- });
- });*/
-
-
+});
 
 
 /*

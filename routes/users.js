@@ -74,13 +74,13 @@ router.post('/', function (req, res, next) {
         phoneNumber: req.body.phoneNumber,
         //TODO make password request hidden
         password: req.body.password,
-        isAdmin: req.body.isAdmin
+        isAdmin: req.body.isAdmin ? req.body.isAdmin : false
     });
     debug("Post: " + user);
     user.save(function (err) {
         if (err) {
             res.statusCode = 400;
-            next(err);
+            res.send(err);
         } else {
             res.status(201).send(user);
         }
