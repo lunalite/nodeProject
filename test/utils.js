@@ -18,6 +18,7 @@ before(function (done) {
     }
 
     if (mongoose.connection.readyState === 0) {
+        mongoose.Promise = global.Promise;
         mongoose.connect(config.testDb, function (err) {
             if (err) {
                 console.log("error connecting");

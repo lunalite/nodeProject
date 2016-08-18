@@ -73,13 +73,14 @@ router.post('/', function (req, res, next) {
         userName: req.body.userName,
         phoneNumber: req.body.phoneNumber,
         //TODO make password request hidden
-        password: req.body.password
+        password: req.body.password,
+        isAdmin: req.body.isAdmin ? req.body.isAdmin : false
     });
     debug("Post: " + user);
     user.save(function (err) {
         if (err) {
             res.statusCode = 400;
-            next(err);
+            res.send(err);
         } else {
             res.status(201).send(user);
         }
@@ -91,9 +92,14 @@ router.put('/:id', function (req, res, next) {
         if (err) {
             res.status(204).send(err);
         } else {
-            user.userName = req.body.userName;
-            user.phoneNumber = req.body.phoneNumber;
-            user.save(function (err) {
+            var updatedUser = {
+                userName: req.body.userName ? req.body.userName : user.userName,
+                phoneNumber: req.body.phoneNumber ? req.body.phoneNumber : user.phoneNumber,
+                password: req.body.password ? req.body.password : user.password,
+                isAdmin: req.body.isAdmin ? req.body.isAdmin : user.isAdmin
+            };
+
+            Users.findOneAndUpdate({_id: user._id}, updatedUser, {new: true}, function (err, dbUser) {
                 if (err) {
                     res.statusCode = 400;
                     next(err);
@@ -104,7 +110,7 @@ router.put('/:id', function (req, res, next) {
                                 href: "/users/" + req.params.id
                             }
                         },
-                        user: user
+                        user: dbUser
                     });
                 }
             });
