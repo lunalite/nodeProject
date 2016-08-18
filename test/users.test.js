@@ -7,10 +7,13 @@ var app = require('../app');
 var utils = require('./utils');
 var should = require('should');
 var User = require('../model/userModel');
-var authenticationHook = [false,false];
+
+/*
+ ** Start of Tests
+ */
 
 before(function (done) {
-    console.log("\nRunning pre-test configuration...\n");
+    console.log("Running pre-test configuration...");
 
     var userArray = [{
         userName: "testName",
@@ -25,25 +28,22 @@ before(function (done) {
         password: "qwe123QWE",
         phoneNumber: 22331122
     }];
-    console.log(userArray);
+    //console.log(userArray);
     User.create(userArray, function (err, createdUsers) {
         if (err) {
             return preTestComplete(err);
         } else {
-            console.log(createdUsers);
+            //console.log(createdUsers);
             return preTestComplete(null);
         }
     });
     function preTestComplete(err) {
-        console.log("\n\npre-test configuration done...\n\n");
+        console.log("pre-test configuration done...");
         done(err);
     }
 });
 
-/*
- ** Start of Tests
- */
-describe('Unauthenticated user cannot visit any sites', function (done) {
+describe('Unauthenticated userTest', function () {
     it('GET / should lead to /login page', function (done) {
         request(app)
             .get('/')
@@ -53,13 +53,12 @@ describe('Unauthenticated user cannot visit any sites', function (done) {
             .expect(302)
             .end(function (err, res) {
                 if (err) {
-                    authenticationHook[0] = "fail";
                     return done(err);
                 }
-                authenticationHook[0] = true;
                 done();
             });
     });
+
     it('GET /users should lead to /login page', function (done) {
         request(app)
             .get('/users')
@@ -68,32 +67,57 @@ describe('Unauthenticated user cannot visit any sites', function (done) {
             })
             .end(function (err, res) {
                 if (err) {
-                    authenticationHook[1] = "fail";
                     return done(err);
                 }
-                authenticationHook[1] = true;
                 done();
             });
     });
+
+    it('should return 401 when wrong username/password is used', function (done) {
+        request(app)
+            .post("/login/local")
+            .send("username=testName")
+            .send("password=qe123QWE")
+            .expect(401, done);
+    });
 });
 
-describe('HTTP requests', function () {
-    describe('GET /', function () {
-        it('should respond with hal format\n', function (done) {
-            request(app)
-                .get('/')
-                .expect('Content-Type', /json/)
-                .expect(function (res) {
-                    res.body._links["self"] = "/";
-                })
-                .expect(200, done);
+describe('Authenticated userTest', function () {
+    var token;
+
+    before(function loginAuth(done) {
+        request(app)
+            .post("/login/local")
+            .send("username=testName")
+            .send("password=qwe123QWE")
+            .expect(function (res) {
+                should.exist(res.body.token);
+                token = res.body.token;
+            })
+            .end(done);
+    });
+
+    describe('HTTP requests', function () {
+        describe('GET /', function () {
+            it('should respond with hal format\n', function (done) {
+                request(app)
+                    .get('/')
+                    .set('authorization', 'bearer ' + token)
+                    .expect('Content-Type', /json/)
+                    .expect(function (res) {
+                        res.body._links["self"] = "/";
+                    })
+                    .expect(200, done);
+            });
         });
+
     });
 
     describe('GET /users', function () {
         it('respond with json', function (done) {
             request(app)
                 .get('/users')
+                .set('authorization', 'bearer ' + token)
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200, done);
@@ -101,6 +125,7 @@ describe('HTTP requests', function () {
         it('should contain the right HAL format\n', function (done) {
             request(app)
                 .get('/users')
+                .set('authorization', 'bearer ' + token)
                 .set('Accept', 'application/json')
                 .expect(function (res) {
                     res.body._links.self.href.should.equal("/users");
@@ -113,13 +138,15 @@ describe('HTTP requests', function () {
         });
     });
 
-
     describe('POST /users', function () {
         it('should POST a new user\n', function (done) {
             request(app)
                 .post('/users')
+                .set('authorization', 'bearer ' + token)
+                .type('json')
                 .send({
                     userName: "test-Name",
+                    password: "test123TEST",
                     phoneNumber: 12345678
                 })
                 .expect(201, done);
@@ -134,11 +161,13 @@ describe('HTTP requests', function () {
                 } else {
                     return request(app)
                         .get('/users/' + data)
+                        .set('authorization', 'bearer ' + token)
                         .expect('Content-Type', /json/)
                         .expect(function (res) {
                             res.body._links.self.href.should.equal("/users/" + data, "_links/self/href is wrong");
                             res.body.user.userName.should.equal("test-Name", "userName is wrong");
                             res.body.user.phoneNumber.should.equal(12345678, "phoneNumber is wrong");
+                            res.body.user.password.should.equal("test123TEST", "password is wrong");
                         })
                         .expect(200, done);
                 }
@@ -154,6 +183,8 @@ describe('HTTP requests', function () {
                 } else {
                     return request(app)
                         .put('/users/' + data)
+                        .set('authorization', 'bearer ' + token)
+                        .type('json')
                         .send({
                             userName: "Felicia",
                             phoneNumber: 99998888
@@ -180,6 +211,7 @@ describe('HTTP requests', function () {
                     deletedId = data;
                     return request(app)
                         .delete('/users/' + data)
+                        .set('authorization', 'bearer ' + token)
                         .expect(204, done);
                 }
             });
@@ -191,30 +223,32 @@ describe('HTTP requests', function () {
                 } else {
                     return request(app)
                         .get('/users/' + deletedId)
+                        .set('authorization', 'bearer ' + token)
                         .expect(200, done);
                 }
             });
         });
     });
-});
-
-
-describe('Users: models', function () {
-    describe('#create()', function () {
-        it('should create a new User\n', function (done) {
-            var user = {
-                userName: 'test Name',
-                phoneNumber: 99664433
-            };
-            User.create(user, function (err, createdUser) {
-                should.not.exist(err);
-                createdUser.userName.should.equal('test Name');
-                createdUser.phoneNumber.should.equal(99664433);
-                done();
+/*
+    describe('Users: models', function () {
+        describe('#create()', function () {
+            it('should create a new User\n', function (done) {
+                var user = {
+                    userName: 'test Name',
+                    phoneNumber: 99664433
+                };
+                User.create(user, function (err, createdUser) {
+                    should.not.exist(err);
+                    createdUser.userName.should.equal('test Name');
+                    createdUser.phoneNumber.should.equal(99664433);
+                    done();
+                });
             });
         });
-    });
+    });*/
+
 });
+
 
 /*
  ** Functions to increase code readability

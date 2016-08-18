@@ -77,6 +77,14 @@ Added a session.js for handling session and checking if user is logged in, authe
 Other than local strategy, there is http-bearer strategy and OAuth2rize modules being installed that will help create the OAuth system.
 Instead of installing those, I decided to find some other authentication system as it is not efficient to have a OAuth2 implemented for both server and client side.
 Thus, I've implemented the JWT system that provides a token that could be used as http-bearer strategy. We are gonna be using that alongside the local strategy
+
+release/1.6
+Added verification of jwt 
+Revamped test cases to suit after authentication
+did some patch on updating of the users
+Patched a recurring tokening problem
+
+
 Let's try adding cookies and encryption to password.
 
 

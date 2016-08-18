@@ -37,43 +37,41 @@ router.post('/local',
     passport.authenticate('local', {session: false}),
     function (req, res, next) {
         //console.log('successful' + req.user);
-        //console.log('qq ' + req.session.passport.user);
         //console.log('user is authenticated: ' + req.isAuthenticated());
 
-        var token = jwt.sign(req.user, config.secret, {
-            expiresIn: '1d' // expires in 24 hours
+        var pseudoUser = {
+            _id: req.user._id,
+            userName: req.user.userName,
+            password: req.user.password,
+            phoneNumber: req.user.phoneNumber
+        };
+
+        var token = jwt.sign(pseudoUser, config.secret, {
+            expiresIn: '1h' // expires in 1 hour
         });
 
         jwt.verify(token, config.secret, function (err, decoded) {
             if (err) {
-                debug(err);
+                debug("error 1 " + err);
                 next(err);
             } else {
-                debug(decoded._doc._id);
-                Users.findById(decoded._doc._id, function (err, user) {
+                debug(decoded._id);
+                Users.findByIdAndUpdate(decoded._id, {$set: {token: token}}, function (err, user) {
                     if (err) {
                         res.statusCode = 204;
                         debug(err);
                         res.send();
                     } else {
-                        user.token = token;
-                        user.save(function (err, user) {
-                            if (err) {
-                                res.statusCode = 400;
-                                next(err);
-                            } else {
-                                debug(user);
-                                res.json({
-                                    _links: {
-                                        self: {href: "/users/" + req.params.id},
-                                        next: {href: "/"}
-                                    },
-                                    token: token,
-                                    expires: "24 hours",
-                                    message: "Please use token as bearer for authentication purposes by passing it" +
-                                    " in the header with key value 'Authorization'"
-                                });
-                            }
+                        debug("user is " + user);
+                        res.json({
+                            _links: {
+                                self: {href: "/users/" + user._id},
+                                next: {href: "/"}
+                            },
+                            token: token,
+                            expiresIn: "1 hour",
+                            message: "Please use token as bearer for authentication purposes by passing it" +
+                            " in the header with key value 'Authorization'"
                         });
                     }
                 });
