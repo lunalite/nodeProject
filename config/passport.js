@@ -13,7 +13,7 @@ passport.use(new LocalStrategy({
     },
     function (req, username, password, done) {
         Users.findOne({userName: username}, function (err, user) {
-            //console.log(user);
+            console.log(user);
             if (err) {
                 debug("Error with finding user in database");
                 return done(err);
