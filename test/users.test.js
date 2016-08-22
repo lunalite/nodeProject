@@ -18,15 +18,18 @@ before(function (done) {
     var userArray = [{
         userName: "testName",
         password: "qwe123QWE",
-        phoneNumber: 99664433
+        phoneNumber: 99664433,
+        isAdmin: 0
     }, {
         userName: "testNamePut",
         password: "qwe123QWE",
-        phoneNumber: 11223344
+        phoneNumber: 11223344,
+        isAdmin: 1
     }, {
         userName: "testNameDelete",
         password: "qwe123QWE",
-        phoneNumber: 22331122
+        phoneNumber: 22331122,
+        isAdmin: 1
     }];
     //console.log(userArray);
     User.create(userArray, function (err, createdUsers) {
@@ -80,21 +83,57 @@ describe('Unauthenticated userTest', function () {
             .send("password=qe123QWE")
             .expect(401, done);
     });
+
+    it('should return 400 when username is left empty', function (done) {
+        request(app)
+            .post("/login/local")
+            .send("username=")
+            .send("password=qe123QWE")
+            .expect(400, done);
+    });
+
+    it('should return 400 when password is left empty', function (done) {
+        request(app)
+            .post("/login/local")
+            .send("username=testName")
+            .send("password=")
+            .expect(400, done);
+    });
 });
+
+
 
 describe('Authenticated userTest', function () {
     var token;
 
-    before(function loginAuth(done) {
+    before(function adminLoginAuth(done) {
         request(app)
             .post("/login/local")
-            .send("username=testName")
+            .send("username=testNamePut")
             .send("password=qwe123QWE")
             .expect(function (res) {
                 should.exist(res.body.token);
                 token = res.body.token;
             })
             .end(done);
+    });
+
+    describe('Authenticating bearer tokens', function() {
+       it('should return enter bearer within error message', function(done) {
+          request(app)
+              .get('/login/local')
+              .set('authorization', 'bearer ' + token)
+              .expect(function(res) {
+                  res.body.Message.should.equal('You are authenticated.');
+                  res.body.user.userName.should.equal('testNamePut');
+                  should.exist(res.body.user.tokenStartTime);
+                  var startDate = new Date(res.body.user.tokenStartTime);
+                                    var endDate = startDate;
+                  endDate.setHours(startDate.getHours() + 1);
+                  res.body.user.tokenEndTime.should.equal(endDate.toString());
+              })
+              .expect(200, done);
+       });
     });
 
     describe('HTTP requests', function () {
@@ -111,6 +150,29 @@ describe('Authenticated userTest', function () {
             });
         });
 
+    });
+
+    describe('GET /users non-admin', function() {
+        var tokenNonAdmin;
+
+        before(function nonAdminLoginAuth(done) {
+            request(app)
+                .post("/login/local")
+                .send("username=testName")
+                .send("password=qwe123QWE")
+                .expect(function (res) {
+                    should.exist(res.body.token);
+                    tokenNonAdmin = res.body.token;
+                })
+                .end(done);
+        });
+        it('should return unauthorized as isAdmin fails\n', function(done) {
+            request(app)
+                .get('/users')
+                .set('authorization', 'bearer ' + tokenNonAdmin)
+                .expect('Content-Type', /plain/)
+                .expect(403, done);
+        });
     });
 
     describe('GET /users', function () {
@@ -139,6 +201,22 @@ describe('Authenticated userTest', function () {
     });
 
     describe('POST /users', function () {
+        it('should return user validation error if failed', function(done) {
+           request(app)
+               .post('/users')
+               .set('authorization', 'bearer ' + token)
+               .type('json')
+               .send({
+                   username: "test-Name"
+               })
+               .expect(function(res){
+                   console.log(res);
+                   res.body.message.should.equal("Users validation failed");
+                   res.body.errors.password.message.should.equal("emptyPassword");
+                   res.body.errors.phoneNumber.message.should.equal("emptyPhoneNumber");
+               })
+               .expect(400, done);
+        });
         it('should POST a new user\n', function (done) {
             request(app)
                 .post('/users')
@@ -229,23 +307,6 @@ describe('Authenticated userTest', function () {
             });
         });
     });
-/*
-    describe('Users: models', function () {
-        describe('#create()', function () {
-            it('should create a new User\n', function (done) {
-                var user = {
-                    userName: 'test Name',
-                    phoneNumber: 99664433
-                };
-                User.create(user, function (err, createdUser) {
-                    should.not.exist(err);
-                    createdUser.userName.should.equal('test Name');
-                    createdUser.phoneNumber.should.equal(99664433);
-                    done();
-                });
-            });
-        });
-    });*/
 
 });
 

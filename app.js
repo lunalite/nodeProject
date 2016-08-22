@@ -57,37 +57,12 @@ app.use(function (req, res, next) {
 // will print stacktrace
 if (app.get('env') === 'development') {
     app.use(function (err, req, res, next) {
-        /*if (err.message === 'userSchemaError') {
-            res.json({
-                "type": "users/",
-                "title": "Invalid input",
-                "detail": "missing details"
-                //"validationErrors": [{
-                //}]
-            });
-        } else */
-        if (err.message === 'User validation failed') {
-            var errorObj = err.errors;
-            var errorArray = Object.keys(errorObj);
-            var userValidationErrorMessageArray = [];
-            errorArray.forEach(function (current) {
-                var userValidationErrorMessage = errorObj[current].message;
-                debug(userValidationErrorMessage);
-                userValidationErrorMessageArray.push(userValidationErrorMessage);
-            });
-            res.json({
-                "type": "user Validation error",
-                "title": "Invalid input",
-                "detail": userValidationErrorMessageArray
-            });
-        } else {
             debug(err.message);
             res.status(err.status || 500);
             res.render('error', {
                 message: err.message,
                 error: err
             });
-        }
     });
 }
 

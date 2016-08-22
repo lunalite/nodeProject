@@ -15,19 +15,19 @@ passport.use(new LocalStrategy({
         Users.findOne({userName: username}, function (err, user) {
             console.log(user);
             if (err) {
-                debug("Error with finding user in database");
+                //debug("Error with finding user in database");
                 return done(err);
             }
             if (!user) {
-                debug('incorrect username');
+                //debug('incorrect username');
                 return done(null, false, {message: 'Incorrect username.'});
             }
             //if (!user.validPassword(password)) {
             if (user.password != password) {
-                debug('incorrect password');
+                //debug('incorrect password');
                 return done(null, false, {message: 'Incorrect password.'});
             }
-            debug("Logging in success");
+            //debug("Logging in success");
             return done(null, user);
         });
     }
@@ -37,16 +37,16 @@ passport.use(new BearerStrategy(
     function(token, done) {
         Users.findOne({ token: token }, function (err, user) {
             if (err) {
-                debug("Error with finding user in database");
+                //debug("Error with finding user in database");
                 return done(err);
             }
             if (!user) {
-                debug('incorrect username');
+                //debug('incorrect username');
                 return done(null, false);
             }
             jwt.verify(token, config.secret, function (err, decoded) {
                 if(err) {
-                    debug("error 2 "+ err);
+                    //debug("error 2 "+ err);
                     return done(null, false, {message: "Expired jwt"});
                 } else {
                     return done(null, user, { scope: 'read' });
