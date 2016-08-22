@@ -1,6 +1,9 @@
 language: node_js
 node_js:
   - "node"
-before_script:
-  - npm install
 
+env:
+- NODE_ENV=TEST
+
+before_install:
+ - npm install --only=dev
