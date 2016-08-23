@@ -3,6 +3,11 @@ node_js:
   - "node"
 env:
 - NODE_ENV=TEST
+
+addons:
+  code_climate:
+    repo_token: aff33f...
+
 services:
 - mongodb
 
@@ -11,5 +16,5 @@ before_install:
  - mongo mydb_test --eval 'db.addUser("travis", "test");'
  - npm install --development
 
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+after_script:
+  - codeclimate-test-reporter < lcov.info
