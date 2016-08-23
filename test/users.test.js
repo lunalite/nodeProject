@@ -282,8 +282,8 @@ describe('Authenticated userTest', function () {
                 } else {
                     return request(app)
                         .get('/users/' + deletedId)
-                        .set('authorization', 'bearer ' + token)
-                        .expect(204, done);
+                            .set('authorization', 'bearer ' + token)
+                            .expect(204, done);
                 }
             });
         });
