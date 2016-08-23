@@ -6,43 +6,13 @@ var expect = require('chai').expect;
 var app = require('../app');
 var utils = require('./utils');
 var should = require('should');
-var User = require('../model/userModel');
+var mongoose = require('mongoose');
+var Users = mongoose.model('Users');
 
 /*
  ** Start of Tests
  */
 
-before(function (done) {
-    console.log("Running pre-test configuration...");
-
-    var userArray = [{
-        userName: "testName",
-        password: "qwe123QWE",
-        phoneNumber: 99664433,
-        isAdmin: 0
-    }, {
-        userName: "testNamePut",
-        password: "qwe123QWE",
-        phoneNumber: 11223344,
-        isAdmin: 1
-    }, {
-        userName: "testNameDelete",
-        password: "qwe123QWE",
-        phoneNumber: 22331122,
-        isAdmin: 1
-    }];
-    User.create(userArray, function (err, createdUsers) {
-        if (err) {
-            return preTestComplete(err);
-        } else {
-            return preTestComplete(null);
-        }
-    });
-    function preTestComplete(err) {
-        console.log("pre-test configuration done...");
-        done(err);
-    }
-});
 
 describe('Unauthenticated userTest', function () {
     it('GET / should lead to /login page', function (done) {
@@ -312,7 +282,7 @@ describe('Authenticated userTest', function () {
  ** Functions to increase code readability
  */
 function userIdQuery(_userName, callback) {
-    User.findOne({userName: _userName})
+    Users.findOne({userName: _userName})
         .exec(function (err, user) {
             if (err) {
                 callback(err, null);

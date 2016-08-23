@@ -2,14 +2,12 @@
 
 var express = require('express');
 var router = express.Router();
-var Users = require('../model/userModel');
+var Collections = require('../model/CollectionModel');
 var isLoggedIn = require('./session').isLoggedInMiddleware;
 var isAdmin = require('./session').isAdminMiddleware;
-//var debug = require('debug')('nodeProject:server');
 
 
-router.use('/', isLoggedIn, isAdmin, function (req, res, next) {
-    //debug('User is authenticated at /users: ' + req.isAuthenticated());
+router.use('/', isLoggedIn, function (req, res, next) {
     next();
 });
 
@@ -18,7 +16,7 @@ router.use('/', isLoggedIn, isAdmin, function (req, res, next) {
 router.get('/', function (req, res, next) {
     var countPerPage = req.query.limit;
     var offset = req.query.offset;
-    Users.find(
+    Collections.find(
         {},
         function (err, users) {
             if (err) {
@@ -27,10 +25,10 @@ router.get('/', function (req, res, next) {
                 res.json({
                     _links: {
                         self: {
-                            href: "/users"
+                            href: "/collections"
                         },
                         next: {
-                            href: "/users/:_id"
+                            href: "/collections/:_id"
                         }
                     },
                     find: {
@@ -51,16 +49,15 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/:id', function (req, res, next) {
-    Users.findById(req.params.id, function (err, user) {
+    Collections.findById(req.params.id, function (err, user) {
         if (err) {
             res.statusCode = 204;
-            //debug(err);
             res.send();
         } else {
             res.json({
                 _links: {
                     self: {
-                        href: "/users/" + req.params.id
+                        href: "/collections/" + req.params.id
                     }
                 },
                 user: user
@@ -70,8 +67,8 @@ router.get('/:id', function (req, res, next) {
 });
 
 router.post('/', function (req, res, next) {
-    var user = new Users({
-        userName: req.body.userName,
+    var user = new Collections({
+        name: req.body.name,
         phoneNumber: req.body.phoneNumber,
         //TODO make password request hidden
         password: req.body.password,
@@ -87,7 +84,7 @@ router.post('/', function (req, res, next) {
         }
     });
 });
-
+/*
 router.put('/:id', function (req, res, next) {
     Users.findById(req.params.id, function (err, user) {
         if (err) {
@@ -131,5 +128,5 @@ router.delete('/:id', function (req, res, next) {
         }
     });
 });
-
+*/
 module.exports = router;
