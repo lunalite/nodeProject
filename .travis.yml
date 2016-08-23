@@ -10,3 +10,6 @@ before_install:
  - sleep 15
  - mongo mydb_test --eval 'db.addUser("travis", "test");'
  - npm install --development
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
