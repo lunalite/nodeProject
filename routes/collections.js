@@ -2,7 +2,7 @@
 
 var express = require('express');
 var router = express.Router();
-var Collections = require('../model/CollectionModel');
+var Collections = require('../model/collectionModel');
 var isLoggedIn = require('./session').isLoggedInMiddleware;
 var isAdmin = require('./session').isAdminMiddleware;
 
@@ -83,7 +83,7 @@ router.post('/', function (req, res, next) {
     });
     collection.save(function (err) {
         if (err) {
-            next(err);
+            res.status(400).send(err);
         } else {
             res.status(201).send(collection);
         }
