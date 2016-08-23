@@ -31,12 +31,10 @@ before(function (done) {
         phoneNumber: 22331122,
         isAdmin: 1
     }];
-    //console.log(userArray);
     User.create(userArray, function (err, createdUsers) {
         if (err) {
             return preTestComplete(err);
         } else {
-            //console.log(createdUsers);
             return preTestComplete(null);
         }
     });
