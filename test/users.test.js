@@ -200,16 +200,16 @@ describe('Authenticated userTest', function () {
 
     describe('GET /users/:id', function () {
         it('should respond with posted user\n', function (done) {
-            userIdQuery("test-Name", function (err, data) {
+            userIdQuery("test-Name", function (err, _id) {
                 if (err) {
                     return done(err);
                 } else {
                     return request(app)
-                        .get('/users/' + data)
+                        .get('/users/' + _id)
                         .set('authorization', 'bearer ' + token)
                         .expect('Content-Type', /json/)
                         .expect(function (res) {
-                            res.body._links.self.href.should.equal("/users/" + data, "_links/self/href is wrong");
+                            res.body._links.self.href.should.equal("/users/" + _id, "_links/self/href is wrong");
                             res.body.user.userName.should.equal("test-Name", "userName is wrong");
                             res.body.user.phoneNumber.should.equal(12345678, "phoneNumber is wrong");
                             res.body.user.password.should.equal("test123TEST", "password is wrong");
@@ -218,16 +218,30 @@ describe('Authenticated userTest', function () {
                 }
             });
         });
+
+        it('should return a status of 204 when a non-existing individual user is requested', function (done) {
+            request(app)
+                .get('/users/' + "57bc4d605a3daf042376f97d")
+                .set('authorization', 'bearer ' + token)
+                .expect(204, done);
+        });
+
+        it('should return a bad request for user with status 400', function (done) {
+            request(app)
+                .get('/users/' + "1fewjiofj2wefwe")
+                .set('authorization', 'bearer ' + token)
+                .expect(400, done);
+        });
     });
 
     describe('PUT /users', function () {
         it('should update the posted user\n', function (done) {
-            userIdQuery("testNamePut", function (err, data) {
+            userIdQuery("testNamePut", function (err, _id) {
                 if (err) {
                     return done(err);
                 } else {
                     return request(app)
-                        .put('/users/' + data)
+                        .put('/users/' + _id)
                         .set('authorization', 'bearer ' + token)
                         .type('json')
                         .send({
@@ -236,7 +250,7 @@ describe('Authenticated userTest', function () {
                         })
                         .expect('Content-Type', /json/)
                         .expect(function (res) {
-                            res.body._links.self.href.should.equal("/users/" + data, "_links/self/href is wrong");
+                            res.body._links.self.href.should.equal("/users/" + _id, "_links/self/href is wrong");
                             res.body.user.userName.should.equal("Felicia", "userName is wrong");
                             res.body.user.phoneNumber.should.equal(99998888, "phoneNumber is wrong");
                         })

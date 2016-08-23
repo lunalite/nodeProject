@@ -59,7 +59,7 @@ before(function (done) {
 });
 
 after(function (done) {
-    console.log("Test is done. Disconnecting from " + config.testDb);
+    console.log("\nTest is done. Disconnecting from " + config.testDb);
     mongoose.disconnect();
     return done();
 });

@@ -15,6 +15,9 @@ before(function (done) {
     var CollectionArray = [{
         name: "testProd",
         description: "This is a test production"
+    }, {
+        name: "deleteProd",
+        description: "This prod is gonna be deleted"
     }];
     Collections.create(CollectionArray, function (err, CollectionArray) {
         if (err) {
@@ -30,7 +33,7 @@ before(function (done) {
 });
 
 
-describe('Authenticated collections test', function() {
+describe('Authenticated collections test', function () {
     var tokenNonAdmin;
 
     before(function nonAdminLoginAuth(done) {
@@ -44,20 +47,130 @@ describe('Authenticated collections test', function() {
             })
             .end(done);
     });
+    describe('GET /collections', function () {
+        it('should return all collections', function (done) {
+            request(app)
+                .get('/collections')
+                .set('authorization', 'bearer ' + tokenNonAdmin)
+                .expect(200, done);
+        });
 
-    it('GET all collections', function(done) {
-        request(app)
-            .get('/collections')
-            .set('authorization', 'bearer ' + tokenNonAdmin)
-            .expect(200, done);
+        it('GET collections based on page number');
+        it('GET collections based on numbers per page');
     });
 
-    it('GET collections based on page number');
-    it('GET collections based on numbers per page');
-    it('GET an individual collection');
-    it('POST a new item successfully');
-    it('POST new item without name returns error missingName.');
-    it('DELETE an item successfully');
-    it('PUT an item successfully');
+    describe('GET /collections/:id', function () {
+        it('should return an individual collection', function (done) {
+            collectionsIdQuery("testProd", function (err, _id) {
+                if (err) {
+                    return done(err);
+                } else {
+                    request(app)
+                        .get('/collections/' + _id)
+                        .set('authorization', 'bearer ' + tokenNonAdmin)
+                        .expect(200, done);
+                }
+            });
+        });
 
-});
+        it('should return a status of 204 when a non-existing individual collection is requested', function (done) {
+            request(app)
+                .get('/collections/' + "57bc4d605a3daf042376f97d")
+                .set('authorization', 'bearer ' + tokenNonAdmin)
+                .expect(204, done);
+        });
+
+        it('should return a bad request for collection with status 400', function (done) {
+            request(app)
+                .get('/collections/' + "1fewjiofj2wefwe")
+                .set('authorization', 'bearer ' + tokenNonAdmin)
+                .expect(400, done);
+        });
+    });
+
+    describe('POST /collections/:id', function () {
+        it('should create a new item successfully with just the name', function (done) {
+            request(app)
+                .post('/collections')
+                .set('authorization', 'bearer ' + tokenNonAdmin)
+                .send({
+                    name: "testProd2"
+                })
+                .expect(function (res) {
+                    res.body.name.should.equal("testProd2");
+                })
+                .expect(201, done);
+        });
+
+        it('should create a new item successfully with both name and description', function (done) {
+            request(app)
+                .post('/collections')
+                .set('authorization', 'bearer ' + tokenNonAdmin)
+                .send({
+                    name: "testProd2",
+                    description: "This is a testprod2"
+                })
+                .expect(function (res) {
+                    res.body.name.should.equal("testProd2");
+                    res.body.description.should.equal("This is a testprod2");
+                })
+                .expect(201, done);
+        });
+
+        it('should returns error missingName when name is missing.', function (done) {
+            request(app)
+                .post('/collections')
+                .set('authorization', 'bearer ' + tokenNonAdmin)
+                .expect(function (res) {
+                    res.body.errors.name.message.should.equal("missingName");
+                })
+                .expect(400, done);
+        });
+    });
+
+    describe('DELETE /collections/:id', function () {
+        it('should delete an item successfully returning 204');
+    });
+
+
+    describe('PUT /collections/:id', function () {
+        it('should update the collection successfully', function (done) {
+            collectionsIdQuery("testProd", function (err, _id) {
+                if (err) {
+                    return done(err);
+                } else {
+                    request(app)
+                        .put('/collections/' + _id)
+                        .set('authorization', 'bearer ' + tokenNonAdmin)
+                        .set('Content-Type', 'application/json')
+                        .send({
+                            name: "Felicia",
+                            description: "This is a girl"
+                        })
+                        .expect('Content-Type', /json/)
+                        .expect(function (res) {
+                            res.body.collection.name.should.equal("Felicia", "wrong name");
+                            res.body.collection.description.should.equal("This is a girl", "wrong Description");
+                        })
+                        .expect(200, done);
+                }
+            });
+        });
+    });
+
+
+})
+;
+
+function collectionsIdQuery(_name, callback) {
+    Collections.findOne({name: _name})
+        .exec(function (err, user) {
+            if (err) {
+                callback(err, null);
+            } else if (user == null) {
+                callback(null, null);
+            } else {
+                callback(null, user._id);
+            }
+        });
+}

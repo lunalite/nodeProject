@@ -24,7 +24,7 @@ mongoose.connect(config.db, function (err) {
 debug('connected to the database: ' + config.db);
 
 // Switching debug mode on
-mongoose.set('debug', true);
+//mongoose.set('debug', true);
 
 /**
  * Get port from environment and store in Express.

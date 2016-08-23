@@ -31,6 +31,9 @@ router.get('/', function (req, res, next) {
                         },
                         next: {
                             href: "/users/:_id"
+                        },
+                        back: {
+                            href: "/users/"
                         }
                     },
                     find: {
@@ -51,22 +54,31 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/:id', function (req, res, next) {
-    Users.findById(req.params.id, function (err, user) {
-        if (err) {
-            res.statusCode = 204;
-            //debug(err);
-            res.send();
-        } else {
-            res.json({
-                _links: {
-                    self: {
-                        href: "/users/" + req.params.id
-                    }
-                },
-                user: user
-            });
-        }
-    });
+    if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+        Users.findById(req.params.id, function (err, user) {
+            if (err) {
+                next(err);
+            } else {
+                if (user) {
+                    res.json({
+                        _links: {
+                            self: {
+                                href: "/users/" + req.params.id
+                            },
+                            back: {
+                                href: "/users/"
+                            }
+                        },
+                        user: user
+                    });
+                } else {
+                    res.status(204).send();
+                }
+            }
+        });
+    } else {
+        enterValidId(req, res);
+    }
 });
 
 router.post('/', function (req, res, next) {
@@ -89,34 +101,45 @@ router.post('/', function (req, res, next) {
 });
 
 router.put('/:id', function (req, res, next) {
-    Users.findById(req.params.id, function (err, user) {
-        if (err) {
-            res.status(204).send(err);
-        } else {
-            var updatedUser = {
-                userName: req.body.userName ? req.body.userName : user.userName,
-                phoneNumber: req.body.phoneNumber ? req.body.phoneNumber : user.phoneNumber,
-                password: req.body.password ? req.body.password : user.password,
-                isAdmin: req.body.isAdmin ? req.body.isAdmin : user.isAdmin
-            };
+    if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+        Users.findById(req.params.id, function (err, user) {
+            if (err) {
+                next(err);
+            } else {
+                if (user) {
+                    var updatedUser = {
+                        userName: req.body.userName ? req.body.userName : user.userName,
+                        phoneNumber: req.body.phoneNumber ? req.body.phoneNumber : user.phoneNumber,
+                        password: req.body.password ? req.body.password : user.password,
+                        isAdmin: req.body.isAdmin ? req.body.isAdmin : user.isAdmin
+                    };
 
-            Users.findOneAndUpdate({_id: user._id}, updatedUser, {new: true}, function (err, dbUser) {
-                if (err) {
-                    res.statusCode = 400;
-                    next(err);
-                } else {
-                    res.json({
-                        _links: {
-                            self: {
-                                href: "/users/" + req.params.id
-                            }
-                        },
-                        user: dbUser
+                    Users.findOneAndUpdate({_id: user._id}, updatedUser, {new: true}, function (err, dbUser) {
+                        if (err) {
+                            res.statusCode = 400;
+                            next(err);
+                        } else {
+                            res.json({
+                                _links: {
+                                    self: {
+                                        href: "/users/" + req.params.id
+                                    },
+                                    back: {
+                                        href: "/users/"
+                                    }
+                                },
+                                user: dbUser
+                            });
+                        }
                     });
+                } else {
+                    res.status(204).send();
                 }
-            });
-        }
-    });
+            }
+        });
+    } else {
+        enterValidId(req, res);
+    }
 });
 
 router.delete('/:id', function (req, res, next) {
@@ -131,5 +154,19 @@ router.delete('/:id', function (req, res, next) {
         }
     });
 });
+
+function enterValidId(req, res) {
+    res.status(400).send({
+        message: "Please enter a valid _id",
+        _links: {
+            self: {
+                href: "/users/" + req.params.id
+            },
+            back: {
+                href: "/users/"
+            }
+        }
+    });
+}
 
 module.exports = router;
