@@ -17,5 +17,5 @@ before_install:
  - npm install --development
 
 after_script:
-  - npm test-coverage
+  - npm run test-coverage
   - codeclimate-test-reporter < lcov.info
