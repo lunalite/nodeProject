@@ -210,7 +210,6 @@ describe('Authenticated userTest', function () {
                    username: "test-Name"
                })
                .expect(function(res){
-                   console.log(res);
                    res.body.message.should.equal("Users validation failed");
                    res.body.errors.password.message.should.equal("emptyPassword");
                    res.body.errors.phoneNumber.message.should.equal("emptyPhoneNumber");
