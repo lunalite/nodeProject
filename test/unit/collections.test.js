@@ -45,7 +45,7 @@ describe('Authenticated collections test', function () {
                 should.exist(res.body.token);
                 tokenNonAdmin = res.body.token;
             })
-            .expect(200,done);
+            .expect(200, done);
     });
 
     describe('GET /collections', function () {
@@ -130,9 +130,37 @@ describe('Authenticated collections test', function () {
     });
 
     describe('DELETE /collections/:id', function () {
-        it('should delete an item successfully returning 204');
-    });
+        var deletedId;
+        it('should delete an item successfully returning 204', function (done) {
+            collectionsIdQuery("testProd2", function (err, data) {
+                if (err) {
+                    return done(err);
+                } else {
+                    deletedId = data;
+                    return request(app)
+                        .delete('/collections/' + data)
+                        .set('authorization', 'bearer ' + tokenNonAdmin)
+                        .expect(204, done);
+                }
+            });
+        });
+        after(function() {
+            it('should not be able to GET the collection\n', function (done) {
+                collectionsIdQuery("testProd2", function (err, data) {
+                    if (err) {
+                        return done(err);
+                    } else {
+                        console.log(data);
+                        return request(app)
+                            .get('/collections/' + deletedId)
+                            .set('collections', 'bearer ' + tokenNonAdmin)
+                            .expect(204, done);
+                    }
+                });
+            });
+        });
 
+    });
 
     describe('PUT /collections/:id', function () {
         it('should update the collection successfully', function (done) {
@@ -157,11 +185,22 @@ describe('Authenticated collections test', function () {
                 }
             });
         });
+
+        it('should return a status of 204 when a non-existing individual collection is requested', function (done) {
+            request(app)
+                .put('/collections/' + "57bc4d605a3daf042376f97d")
+                .set('authorization', 'bearer ' + tokenNonAdmin)
+                .expect(204, done);
+        });
+
+        it('should return a bad request for collection with status 400', function (done) {
+            request(app)
+                .put('/collections/' + "1fewjiofj2wefwe")
+                .set('authorization', 'bearer ' + tokenNonAdmin)
+                .expect(400, done);
+        });
     });
-
-
-})
-;
+});
 
 function collectionsIdQuery(_name, callback) {
     Collections.findOne({name: _name})
@@ -175,3 +214,4 @@ function collectionsIdQuery(_name, callback) {
             }
         });
 }
+

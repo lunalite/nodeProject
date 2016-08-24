@@ -258,6 +258,21 @@ describe('Authenticated userTest', function () {
                 }
             });
         });
+
+        it('should return a status of 204 when a non-existing individual user is requested', function (done) {
+            request(app)
+                .put('/users/' + "57bc4d605a3daf042376f97d")
+                .set('authorization', 'bearer ' + token)
+                .expect(204, done);
+        });
+
+        it('should return a bad request for user with status 400', function (done) {
+            request(app)
+                .put('/users/' + "1fewjiofj2wefwe")
+                .set('authorization', 'bearer ' + token)
+                .expect(400, done);
+        });
+
     });
 
     describe('DELETE /users/:id', function () {
@@ -275,20 +290,22 @@ describe('Authenticated userTest', function () {
                 }
             });
         });
-        it('should not be able to GET the user\n', function (done) {
-            userIdQuery("testNameDelete", function (err, data) {
-                if (err) {
-                    return done(err);
-                } else {
-                    return request(app)
-                        .get('/users/' + deletedId)
-                        .set('authorization', 'bearer ' + token)
-                        .expect(204, done);
-                }
+
+        after(function () {
+            it('should not be able to GET the user\n', function (done) {
+                userIdQuery("testNameDelete", function (err, data) {
+                    if (err) {
+                        return done(err);
+                    } else {
+                        return request(app)
+                            .get('/users/' + deletedId)
+                            .set('authorization', 'bearer ' + token)
+                            .expect(204, done);
+                    }
+                });
             });
         });
     });
-
 });
 
 
