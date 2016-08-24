@@ -13,6 +13,7 @@ describe('GET /nonExistentPages', function() {
         request(app)
             .get('/a')
             .expect(function(res) {
+                console.log(res.body);
                 res.body.message.should.equal("Not Found");
             })
             .expect(404, done);
