@@ -16,7 +16,7 @@ install: true
 before_install:
  - sleep 15
  - mongo mydb_test --eval 'db.addUser("travis", "test");'
- - npm install --development
+ - npm install --only=dev
 
 after_script:
   - codeclimate-test-reporter < ./coverage/lcov.info

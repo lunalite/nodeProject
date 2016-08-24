@@ -5,11 +5,9 @@ var router = express.Router();
 var Users = require('../model/userModel');
 var isLoggedIn = require('./session').isLoggedInMiddleware;
 var isAdmin = require('./session').isAdminMiddleware;
-//var debug = require('debug')('nodeProject:server');
 
 
 router.use('/', isLoggedIn, isAdmin, function (req, res, next) {
-    //debug('User is authenticated at /users: ' + req.isAuthenticated());
     next();
 });
 
@@ -89,7 +87,6 @@ router.post('/', function (req, res, next) {
         password: req.body.password,
         isAdmin: req.body.isAdmin ? req.body.isAdmin : false
     });
-    //debug("Post: " + user);
     user.save(function (err) {
         if (err) {
             res.statusCode = 400;
@@ -150,7 +147,6 @@ router.delete('/:id', function (req, res, next) {
             res.status(204).send(err);
         } else {
             res.status(204).send();
-            //debug("DELETE " + user);
         }
     });
 });

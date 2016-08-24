@@ -6,7 +6,6 @@ var session = require('express-session');
 var config = require('./config/config');
 var path = require('path');
 var bodyParser = require('body-parser');
-var debug = require('debug')('nodeProject:server');
 var passport = require('./config/passport');
 
 var routes = require('./routes/index');

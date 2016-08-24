@@ -11,7 +11,6 @@
     "body-parser": "~1.15.1",
     "connect-ensure-login": "^0.1.1",
     "cookie-parser": "~1.4.3",
-    "debug": "~2.2.0",
     "express": "~4.13.4",
     "express-session": "^1.14.0",
     "jsonwebtoken": "^7.1.7",

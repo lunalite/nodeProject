@@ -4,7 +4,6 @@ var express = require('express');
 var router = express.Router();
 var passport = require('../config/passport');
 var jwt = require('jsonwebtoken');
-var debug = require('debug')('nodeProject:server');
 var config = require('../config/config');
 var Users = require('../model/userModel');
 
@@ -87,29 +86,25 @@ router.post('/local',
         };
 
         var token = jwt.sign(pseudoUser, config.secret, {
-            expiresIn: '1h' // expires in 1 hour
+            expiresIn: config.jwtExpiryTime
         });
 
         jwt.verify(token, config.secret, function (err, decoded) {
             if (err) {
-                debug("error 1 " + err);
                 next(err);
             } else {
-                debug(decoded._id);
                 Users.findByIdAndUpdate(decoded._id, {$set: {token: token}}, function (err, user) {
                     if (err) {
                         res.statusCode = 204;
-                        debug(err);
                         res.send();
                     } else {
-                        debug("user is " + user);
                         res.json({
                             _links: {
                                 self: {href: "/users/" + user._id},
                                 next: {href: "/"}
                             },
                             token: token,
-                            expiresIn: "1 hour",
+                            expiresIn: config.jwtExpiryTime,
                             message: "Please use token as bearer for authentication purposes by passing it" +
                             " in the header with key value 'Authorization'",
                             authentication: "Send a GET request to /login/local with bearer token to authenticate if" +

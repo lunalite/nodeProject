@@ -7,7 +7,6 @@
  */
 var config = require('../config/config');
 var app = require('../app');
-var debug = require('debug')('nodeProject:server');
 var http = require('http');
 var mongoose = require('mongoose');
 
@@ -21,10 +20,8 @@ mongoose.connect(config.db, function (err) {
     }
 });
 
-debug('connected to the database: ' + config.db);
+console.log('connected to the database: ' + config.db + ' under the enivronment:' + process.env.NODE_ENV);
 
-// Switching debug mode on
-//mongoose.set('debug', true);
 
 /**
  * Get port from environment and store in Express.
@@ -102,5 +99,5 @@ function onError(error) {
 function onListening() {
     var addr = server.address();
     var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
-    debug('Listening on ' + bind);
+    console.log('Listening on ' + bind);
 }

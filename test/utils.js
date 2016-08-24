@@ -5,8 +5,6 @@ var config = require('../config/config');
 var mongoose = require('mongoose');
 var Users = mongoose.model('Users');
 
-process.env.NODE_ENV = 'TEST';
-
 before(function (done) {
     console.log("Starting unit test...");
     console.log("Connecting to database node environment: " + process.env.NODE_ENV + " at " + config.testDb);
@@ -20,7 +18,6 @@ before(function (done) {
     }
 
     if (mongoose.connection.readyState === 0) {
-        mongoose.Promise = global.Promise;
         mongoose.connect(config.testDb, function (err) {
             if (err) {
                 console.log("error connecting");

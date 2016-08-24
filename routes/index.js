@@ -3,7 +3,6 @@
 var express = require('express');
 var router = express.Router();
 var isLoggedIn = require('./session').isLoggedInMiddleware;
-var debug = require('debug')('nodeProject:server');
 var passport = require('../config/passport');
 
 /* GET home page. */

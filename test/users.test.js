@@ -8,6 +8,7 @@ var utils = require('./utils');
 var should = require('should');
 var mongoose = require('mongoose');
 var Users = mongoose.model('Users');
+var config = require('../config/config');
 
 /*
  ** Start of Tests
@@ -70,7 +71,6 @@ describe('Unauthenticated userTest', function () {
 });
 
 
-
 describe('Authenticated userTest', function () {
     var token;
 
@@ -86,22 +86,22 @@ describe('Authenticated userTest', function () {
             .end(done);
     });
 
-    describe('Authenticating bearer tokens', function() {
-       it('should return enter bearer within error message', function(done) {
-          request(app)
-              .get('/login/local')
-              .set('authorization', 'bearer ' + token)
-              .expect(function(res) {
-                  res.body.Message.should.equal('You are authenticated.');
-                  res.body.user.userName.should.equal('testNamePut');
-                  should.exist(res.body.user.tokenStartTime);
-                  var startDate = new Date(res.body.user.tokenStartTime);
-                                    var endDate = startDate;
-                  endDate.setHours(startDate.getHours() + 1);
-                  res.body.user.tokenEndTime.should.equal(endDate.toString());
-              })
-              .expect(200, done);
-       });
+    describe('Authenticating bearer tokens', function () {
+        it('should return enter bearer within error message', function (done) {
+            request(app)
+                .get('/login/local')
+                .set('authorization', 'bearer ' + token)
+                .expect(function (res) {
+                    res.body.Message.should.equal('You are authenticated.');
+                    res.body.user.userName.should.equal('testNamePut');
+                    should.exist(res.body.user.tokenStartTime);
+                    var startDate = new Date(res.body.user.tokenStartTime);
+                    var endDate = startDate;
+                    endDate.setHours(startDate.getHours() + parseInt(config.jwtExpiryTime));
+                    res.body.user.tokenEndTime.should.equal(endDate.toString());
+                })
+                .expect(200, done);
+        });
     });
 
     describe('HTTP requests', function () {
@@ -120,7 +120,7 @@ describe('Authenticated userTest', function () {
 
     });
 
-    describe('GET /users non-admin', function() {
+    describe('GET /users non-admin', function () {
         var tokenNonAdmin;
 
         before(function nonAdminLoginAuth(done) {
@@ -134,7 +134,7 @@ describe('Authenticated userTest', function () {
                 })
                 .end(done);
         });
-        it('should return unauthorized as isAdmin fails\n', function(done) {
+        it('should return unauthorized as isAdmin fails\n', function (done) {
             request(app)
                 .get('/users')
                 .set('authorization', 'bearer ' + tokenNonAdmin)
@@ -169,20 +169,20 @@ describe('Authenticated userTest', function () {
     });
 
     describe('POST /users', function () {
-        it('should return user validation error if failed', function(done) {
-           request(app)
-               .post('/users')
-               .set('authorization', 'bearer ' + token)
-               .type('json')
-               .send({
-                   username: "test-Name"
-               })
-               .expect(function(res){
-                   res.body.message.should.equal("Users validation failed");
-                   res.body.errors.password.message.should.equal("emptyPassword");
-                   res.body.errors.phoneNumber.message.should.equal("emptyPhoneNumber");
-               })
-               .expect(400, done);
+        it('should return user validation error if failed', function (done) {
+            request(app)
+                .post('/users')
+                .set('authorization', 'bearer ' + token)
+                .type('json')
+                .send({
+                    username: "test-Name"
+                })
+                .expect(function (res) {
+                    res.body.message.should.equal("Users validation failed");
+                    res.body.errors.password.message.should.equal("emptyPassword");
+                    res.body.errors.phoneNumber.message.should.equal("emptyPhoneNumber");
+                })
+                .expect(400, done);
         });
         it('should POST a new user\n', function (done) {
             request(app)
@@ -282,8 +282,8 @@ describe('Authenticated userTest', function () {
                 } else {
                     return request(app)
                         .get('/users/' + deletedId)
-                            .set('authorization', 'bearer ' + token)
-                            .expect(204, done);
+                        .set('authorization', 'bearer ' + token)
+                        .expect(204, done);
                 }
             });
         });
