@@ -2,7 +2,6 @@
 
 var mongoose = require('mongoose');
 var config = require('../config/config');
-var mongoose = require('mongoose');
 var Users = mongoose.model('Users');
 
 before(function (done) {

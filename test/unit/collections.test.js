@@ -3,8 +3,8 @@
 var request = require('supertest');
 var assert = require('chai').assert;
 var expect = require('chai').expect;
-var app = require('../app');
-var utils = require('./utils');
+var app = require('../../app');
+var utils = require('./../utils');
 var should = require('should');
 var mongoose = require('mongoose');
 var Collections = mongoose.model('Collections');
@@ -45,8 +45,9 @@ describe('Authenticated collections test', function () {
                 should.exist(res.body.token);
                 tokenNonAdmin = res.body.token;
             })
-            .end(done);
+            .expect(200,done);
     });
+
     describe('GET /collections', function () {
         it('should return all collections', function (done) {
             request(app)
