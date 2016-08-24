@@ -11,8 +11,6 @@ addons:
 services:
 - mongodb
 
-install: true
-
 before_install:
  - sleep 15
  - mongo mydb_test --eval 'db.addUser("travis", "test");'
