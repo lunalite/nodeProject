@@ -55,7 +55,7 @@ router.get('/:id', function (req, res, next) {
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
         Users.findById(req.params.id, function (err, user) {
             if (err) {
-                next(err);
+                return next(err);
             } else {
                 if (user) {
                     res.json({
@@ -101,7 +101,7 @@ router.put('/:id', function (req, res, next) {
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
         Users.findById(req.params.id, function (err, user) {
             if (err) {
-                next(err);
+                return next(err);
             } else {
                 if (user) {
                     var updatedUser = {
@@ -114,7 +114,7 @@ router.put('/:id', function (req, res, next) {
                     Users.findOneAndUpdate({_id: user._id}, updatedUser, {new: true}, function (err, dbUser) {
                         if (err) {
                             res.statusCode = 400;
-                            next(err);
+                            return next(err);
                         } else {
                             res.json({
                                 _links: {

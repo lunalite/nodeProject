@@ -20,7 +20,7 @@ router.get('/', function (req, res, next) {
         {},
         function (err, users) {
             if (err) {
-                next(err);
+                return next(err);
             } else {
                 res.json({
                     _links: {
@@ -52,7 +52,7 @@ router.get('/:id', function (req, res, next) {
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
         Collections.findById(req.params.id, function (err, collection) {
             if (err) {
-                next(err);
+                return next(err);
             } else {
                 if (collection) {
                     res.status(200).json({
@@ -94,7 +94,7 @@ router.put('/:id', function (req, res, next) {
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
         Collections.findById(req.params.id, function (err, collection) {
             if (err) {
-                next(err);
+                return next(err);
             } else {
                 if (collection) {
                     var updatedCollection = {
@@ -104,7 +104,7 @@ router.put('/:id', function (req, res, next) {
 
                     Collections.findOneAndUpdate({_id: collection._id}, updatedCollection, {new: true}, function (err, dbCollection) {
                         if (err) {
-                            next(err);
+                            return next(err);
                         } else {
                             res.json({
                                 _links: {
