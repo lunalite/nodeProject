@@ -4,7 +4,7 @@ var request = require('supertest');
 var assert = require('chai').assert;
 var expect = require('chai').expect;
 var app = require('../../app');
-var utils = require('./../utils.test');
+var utils = require('./utils.test.js');
 var should = require('should');
 var mongoose = require('mongoose');
 

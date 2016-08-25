@@ -4,7 +4,7 @@ module.exports = {
     port: process.env.PORT || "3000",
     testDb: "mongodb://localhost/test",
     //TODO: Set up in environment the secret to prevent it from being leaked.
-    secret: "bukitPanjang993",
+    secret: process.env.NODE_SECRET,
     jwtExpiryTime: "3h"
 };
 

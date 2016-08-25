@@ -66,9 +66,6 @@ describe('Running users unit test', function () {
                     .post("/login/local")
                     .send('username=testNamePut')
                     .send('password=qwe123QWE1')
-                    .expect(function (res) {
-                        console.log(res);
-                    })
                     .expect(401, done);
             });
 

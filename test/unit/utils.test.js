@@ -1,16 +1,19 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var config = require('../config/config');
-var Users = require('../model/userModel');
-var Collections = require('../model/collectionModel');
-var Utils = require('../utils');
+var config = require('../../config/config');
+var Users = require('../../model/userModel');
+var Collections = require('../../model/collectionModel');
+var Utils = require('../../utils');
 var assert = require('assert');
 var should = require('should');
 
 describe('Beginning utils testing', function () {
-    before(function (done) {
 
+    /*
+     ** before hook for connecting to mongodb and adding user data
+     */
+    before(function (done) {
         mongoose.connect(config.testDb);
         mongoose.connection.on('connected', function () {
             console.log("Connected to database node environment: " + process.env.NODE_ENV + " at " + config.testDb);
@@ -38,6 +41,9 @@ describe('Beginning utils testing', function () {
 
     });
 
+    /*
+     ** Ensure that the connection to mongodb is done
+     */
     it('should connect to mongodb', function (done) {
         should.equal(mongoose.connection.readyState, 1);
         done();
@@ -50,6 +56,12 @@ after(function (done) {
     return done();
 });
 
+/*
+* createUser function
+*
+* @params done {function} for callback of done to the before hook
+*
+ */
 function createUser(done) {
     console.log('creating users...');
     var userArray = [{
