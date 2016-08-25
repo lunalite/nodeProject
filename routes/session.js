@@ -1,7 +1,8 @@
 "use strict";
 
 var config = require('../config/config');
-var Users = require('../model/userModel');
+var mongoose = require('mongoose');
+var Users = mongoose.model('Users');
 var passport = require('../config/passport');
 
 function SessionHandler() {

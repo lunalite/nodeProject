@@ -5,7 +5,8 @@ var router = express.Router();
 var passport = require('../config/passport');
 var jwt = require('jsonwebtoken');
 var config = require('../config/config');
-var Users = require('../model/userModel');
+var mongoose = require('mongoose');
+var Users = mongoose.model('Users');
 
 router.get('/', function (req, res, next) {
     res.json({
@@ -114,13 +115,6 @@ router.post('/local',
                 });
             }
         });
-    });
-
-
-router.get('/bearer',
-    passport.authenticate('bearer', {session: false}),
-    function (req, res) {
-        res.json(req.user);
     });
 
 

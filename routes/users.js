@@ -2,10 +2,11 @@
 
 var express = require('express');
 var router = express.Router();
-var Users = require('../model/userModel');
+var mongoose = require('mongoose');
+var Users = mongoose.model('Users');
 var isLoggedIn = require('./session').isLoggedInMiddleware;
 var isAdmin = require('./session').isAdminMiddleware;
-
+var Utils = require('../utils');
 
 router.use('/', isLoggedIn, isAdmin, function (req, res, next) {
     next();
@@ -80,11 +81,28 @@ router.get('/:id', function (req, res, next) {
 });
 
 router.post('/', function (req, res, next) {
+    var passwordFromReq = req.body.password;
+    var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    var passwordCheck = passwordRegex.exec(passwordFromReq);
+    if (!passwordCheck) {
+        return res.status(400).send({
+            message:"Password is of invalid format.",
+            Requirement: "At least 8 characters; At least 1 numerical, 1 small letter, 1 capital letter",
+            _links: {
+                self: {
+                    href: "/users/"
+                },
+                back: {
+                    href: "/"
+                }
+            }
+        });
+    }
+
     var user = new Users({
         userName: req.body.userName,
         phoneNumber: req.body.phoneNumber,
-        //TODO make password request hidden
-        password: req.body.password,
+        password: Utils.encryptPassword(passwordFromReq),
         isAdmin: req.body.isAdmin ? req.body.isAdmin : false
     });
     user.save(function (err) {

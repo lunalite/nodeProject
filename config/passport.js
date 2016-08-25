@@ -6,7 +6,7 @@ var BearerStrategy = require('passport-http-bearer').Strategy;
 var Users = require('../model/userModel');
 var jwt = require('jsonwebtoken');
 var config = require('./config');
-
+var Utils = require('../utils');
 passport.use(new LocalStrategy({
         passReqToCallback: true
     },
@@ -16,10 +16,11 @@ passport.use(new LocalStrategy({
                 return done(err);
             }
             if (!user) {
+                console.log('incorrect username');
                 return done(null, false, {message: 'Incorrect username.'});
             }
-            //if (!user.validPassword(password)) {
-            if (user.password != password) {
+            if ((Utils.decryptPassword(user.password)) != password) {
+                console.log('incorrect password');
                 return done(null, false, {message: 'Incorrect password.'});
             }
             return done(null, user);
@@ -28,8 +29,8 @@ passport.use(new LocalStrategy({
 ));
 
 passport.use(new BearerStrategy(
-    function(token, done) {
-        Users.findOne({ token: token }, function (err, user) {
+    function (token, done) {
+        Users.findOne({token: token}, function (err, user) {
             if (err) {
                 return done(err);
             }
@@ -37,10 +38,10 @@ passport.use(new BearerStrategy(
                 return done(null, false);
             }
             jwt.verify(token, config.secret, function (err, decoded) {
-                if(err) {
+                if (err) {
                     return done(null, false, {message: "Expired jwt"});
                 } else {
-                    return done(null, user, { scope: 'read' });
+                    return done(null, user, {scope: 'read'});
                 }
             });
         });
