@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - "node"
+
+addons:
+  code_climate:
+    repo_token: ecfa4f4d5baee462775d9f7444d11e5d72a7758d4ae5cb239b8a29254e0f9e7c
+
+services:
+- mongodb
+
+before_install:
+ - sleep 15
+ - mongo mydb_test --eval 'db.addUser("travis", "test");'
+ - npm install --only=dev
+
+after_script:
+  - codeclimate-test-reporter < ./coverage/lcov.info

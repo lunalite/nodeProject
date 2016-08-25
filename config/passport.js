@@ -4,52 +4,42 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var Users = require('../model/userModel');
-var debug = require('debug')('nodeProject:server');
 var jwt = require('jsonwebtoken');
 var config = require('./config');
-
+var Utils = require('../utils');
 passport.use(new LocalStrategy({
         passReqToCallback: true
     },
     function (req, username, password, done) {
         Users.findOne({userName: username}, function (err, user) {
-            console.log(user);
             if (err) {
-                debug("Error with finding user in database");
                 return done(err);
             }
             if (!user) {
-                debug('incorrect username');
                 return done(null, false, {message: 'Incorrect username.'});
             }
-            //if (!user.validPassword(password)) {
-            if (user.password != password) {
-                debug('incorrect password');
+            if ((Utils.decryptPassword(user.password)) != password) {
                 return done(null, false, {message: 'Incorrect password.'});
             }
-            debug("Logging in success");
             return done(null, user);
         });
     }
 ));
 
 passport.use(new BearerStrategy(
-    function(token, done) {
-        Users.findOne({ token: token }, function (err, user) {
+    function (token, done) {
+        Users.findOne({token: token}, function (err, user) {
             if (err) {
-                debug("Error with finding user in database");
                 return done(err);
             }
             if (!user) {
-                debug('incorrect username');
                 return done(null, false);
             }
             jwt.verify(token, config.secret, function (err, decoded) {
-                if(err) {
-                    debug("error 2 "+ err);
+                if (err) {
                     return done(null, false, {message: "Expired jwt"});
                 } else {
-                    return done(null, user, { scope: 'read' });
+                    return done(null, user, {scope: 'read'});
                 }
             });
         });

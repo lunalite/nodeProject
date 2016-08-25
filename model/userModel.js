@@ -1,7 +1,6 @@
 "use strict";
 
 var mongoose = require('mongoose');
-var debug = require('debug')('nodeProject:server');
 
 var UserSchema = new mongoose.Schema({
     userName: {
@@ -19,13 +18,7 @@ var UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'emptyPassword'],
-        validate: {
-            validator: function (v) {
-                return (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/).test(v);
-            },
-            message: "invalidPassword"
-        }
+        required: [true, 'emptyPassword']
     },
     phoneNumber: {
         type: Number,
