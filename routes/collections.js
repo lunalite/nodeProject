@@ -14,8 +14,10 @@ router.use('/', isLoggedIn, function (req, res, next) {
 
 /* GET Collections listing. */
 router.get('/', function (req, res, next) {
-    var countPerPage = req.query.limit;
-    var offset = req.query.offset;
+    var limit = parseInt(req.query.limit ? req.query.limit : 10, 10);
+    var page = parseInt(req.query.page ? req.query.page : 1, 10);
+    var offset = parseInt(req.query.offset ? req.query.offset : 0, 10);
+    var totalOffset = offset + limit * (page - 1);
     Collections.count({}, function (err, totalCount) {
         if (err) {
             return next(err);
@@ -37,16 +39,17 @@ router.get('/', function (req, res, next) {
                             next: {
                                 href: "/collections/:_id"
                             },
-                            "offset & limit": {
-                                href: "/collections?limit=__&offset=__"
+                            "offset & limit & page": {
+                                href: "/collections?limit=__&offset=__&page=__"
                             },
                             find: {
                                 // TODO: implement find function
                                 href: ""
                             }
                         },
-                        countPerPage: countPerPage ? collections.length : countPerPage,
+                        countPerPage: limit ? collections.length : limit,
                         totalCount: totalCount,
+                        page: page,
                         _embedded: {
                             collection: collections
                         }
@@ -54,8 +57,8 @@ router.get('/', function (req, res, next) {
                 }
             }
         )
-            .limit(parseInt(countPerPage, 10))
-            .skip(parseInt(offset, 10));
+            .limit(limit)
+            .skip(totalOffset);
     });
 
 });
