@@ -53,11 +53,9 @@ describe('Running collections unit test', function() {
                 request(app)
                     .get('/collections')
                     .set('authorization', 'bearer ' + tokenNonAdmin)
+                    .expect('Content-Type', /json/)
                     .expect(200, done);
             });
-
-            it('GET collections based on page number');
-            it('GET collections based on numbers per page');
         });
 
         describe('GET /collections/:id', function () {

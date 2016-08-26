@@ -172,20 +172,7 @@ describe('Running users unit test', function () {
                     .expect('Content-Type', /json/)
                     .expect(200, done);
             });
-            it('should contain the right HAL format\n', function (done) {
-                request(app)
-                    .get('/users')
-                    .set('authorization', 'bearer ' + token)
-                    .set('Accept', 'application/json')
-                    .expect(function (res) {
-                        res.body._links.self.href.should.equal("/users");
-                        res.body._links.next.href.should.equal("/users/:_id");
-                        res.body.find.href.should.equal("");
-                        (typeof(res.body.totalCount)).should.equal("number");
-                        //TODO add more
-                    })
-                    .end(done);
-            });
+
         });
 
         describe('POST /users', function () {
