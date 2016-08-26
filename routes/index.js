@@ -9,10 +9,11 @@ router.get('/', isLoggedIn, function (req, res, next) {
     res.json({
         _links: {
             self: "/",
-            next: [
-                "/users",
-                "/login"
-            ]
+            next: [{
+                href: "/users"
+            }, {
+                href: "/login"
+            }]
         }
     });
 });

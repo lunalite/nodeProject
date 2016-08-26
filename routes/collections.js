@@ -36,15 +36,16 @@ router.get('/', function (req, res, next) {
                             self: {
                                 href: "/collections"
                             },
-                            next: {
+                            next: [{
                                 href: "/collections/:_id"
-                            },
-                            "offset & limit & page": {
+                            }, {
                                 href: "/collections?limit=__&offset=__&page=__"
-                            },
-                            find: {
+                            }, {
                                 // TODO: implement find function
                                 href: ""
+                            }],
+                            back: {
+                                href: "/"
                             }
                         },
                         countPerPage: limit ? collections.length : limit,

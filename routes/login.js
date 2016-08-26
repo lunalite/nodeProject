@@ -12,11 +12,15 @@ router.get('/', function (req, res, next) {
     res.json({
         Message: "Please log in through the local page",
         _links: {
-            self: "/login",
-            next: [
-                "/login/local",
-                "/login/bearer"
-            ]
+            self: {
+                href: "/login"
+            },
+            next: [{
+                    href: "/login/local"
+                }],
+            back: {
+                    href: "/"
+            }
         }
     });
 });
@@ -35,7 +39,7 @@ router.get('/local', function (req, res, next) {
                     });
                 } else {
                     jwt.verify(secondCheck[1], config.secret, function (err, decoded) {
-                        if(err) {
+                        if (err) {
                             return next(err, {message: "Expired jwt"});
                         } else {
                             return res.json({
@@ -44,8 +48,8 @@ router.get('/local', function (req, res, next) {
                                     _id: decoded._id,
                                     userName: decoded.userName,
                                     phoneNumber: decoded.phoneNumber,
-                                    tokenStartTime: new Date(decoded.iat*1000).toString(),
-                                    tokenEndTime: new Date(decoded.exp*1000).toString()
+                                    tokenStartTime: new Date(decoded.iat * 1000).toString(),
+                                    tokenEndTime: new Date(decoded.exp * 1000).toString()
                                 }
                             });
                         }
@@ -55,7 +59,7 @@ router.get('/local', function (req, res, next) {
             });
         } else {
             return res.json({
-               Message: "Please enter 'bearer ' in front of your token"
+                Message: "Please enter 'bearer ' in front of your token"
             });
         }
     } else {

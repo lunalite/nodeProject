@@ -15,41 +15,53 @@ router.use('/', isLoggedIn, isAdmin, function (req, res, next) {
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
-    var countPerPage = req.query.limit;
-    var offset = req.query.offset;
-    Users.find(
-        {},
-        function (err, users) {
-            if (err) {
-                res.status(204).send(err);
-            } else {
-                res.json({
-                    _links: {
-                        self: {
-                            href: "/users"
-                        },
-                        next: {
-                            href: "/users/:_id"
-                        },
-                        back: {
-                            href: "/users/"
-                        }
-                    },
-                    find: {
-                        // TODO: implement find function
-                        href: ""
-                    },
-                    count: countPerPage,
-                    totalCount: users.length,
-                    _embedded: {
-                        user: users
-                    }
-                });
-            }
+    var limit = parseInt(req.query.limit ? req.query.limit : 10, 10);
+    var page = parseInt(req.query.page ? req.query.page : 1, 10);
+    var offset = parseInt(req.query.offset ? req.query.offset : 0, 10);
+    var totalOffset = offset + limit * (page - 1);
+    Users.count({}, function (err, totalCount) {
+        if (err) {
+            return next(err);
+        } else {
+            return totalCount;
         }
-    )
-        .limit(parseInt(countPerPage, 10))
-        .skip(parseInt(offset, 10));
+    }).then(function (totalCount) {
+        Users.find(
+            {},
+            function (err, users) {
+                if (err) {
+                    res.status(204).send(err);
+                } else {
+                    res.json({
+                        _links: {
+                            self: {
+                                href: "/users"
+                            },
+                            next: [{
+                                href: "/users/:_id"
+                            }, {
+                                href: "/users?limit=__&offset=__&page=__"
+                            }, {
+                                // TODO: implement find function
+                                href: ""
+                            }],
+                            back: {
+                                href: "/"
+                            }
+                        },
+                        countPerPage: limit ? users.length : limit,
+                        totalCount: totalCount,
+                        page: page,
+                        _embedded: {
+                            user: users
+                        }
+                    });
+                }
+            }
+        )
+            .limit(limit)
+            .skip(totalOffset);
+    });
 });
 
 router.get('/:id', function (req, res, next) {
@@ -86,7 +98,7 @@ router.post('/', function (req, res, next) {
     var passwordCheck = passwordRegex.exec(passwordFromReq);
     if (!passwordCheck) {
         return res.status(400).send({
-            message:"Password is of invalid format.",
+            message: "Password is of invalid format.",
             Requirement: "At least 8 characters; At least 1 numerical, 1 small letter, 1 capital letter",
             _links: {
                 self: {
