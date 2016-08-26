@@ -145,11 +145,27 @@ router.post('/', function (req, res, next) {
     });
     user.save(function (err) {
         if (err) {
-            res.statusCode = 400;
-            res.send(err);
-        } else {
-            res.status(201).send(user);
+            res.status(400).send(err);
         }
+        return new Promise(function (resolve, reject) {
+            resolve(Users.update({_id: user._id},
+                {_links: {self: {href: "/users/" + user._id}}},
+                function (err) {
+                    if (err) {
+                        return err;
+                    }
+                }));
+        });
+    }).then(function (err) {
+        if (err) {
+            next(err);
+        }
+        res.status(201).send({
+            user: user,
+            _links: {
+                self: {href: "/users/" + user._id}
+            }
+        });
     });
 });
 

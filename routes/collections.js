@@ -49,6 +49,7 @@ router.get('/', function (req, res, next) {
                         var offsetQueryShow = function (qualifier) {
                             return req.query.offset ? qualifier + "offset=" + offset : "";
                         };
+
                         res.send({
                             _links: {
                                 self: {href: req.originalUrl},
@@ -57,9 +58,10 @@ router.get('/', function (req, res, next) {
                                 },
                                 next: {
                                     href: (page >= lastPage) ? "" : ("/collections?" + (
-                                    req.query.page ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
-                                        req.query.limit ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
-                                            req.query.offset ? pageQueryShow("next") + offsetQueryShow("&") : ""))
+                                        req.query.page ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
+                                            req.query.limit ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
+                                                req.query.offset ? pageQueryShow("next") + offsetQueryShow("&") :
+                                                    pageQueryShow("next")))
                                 },
                                 previous: {
                                     href: (page <= 1 || page > lastPage) ? "" : ("/collections?" + (
@@ -71,7 +73,7 @@ router.get('/', function (req, res, next) {
                                     href: lastPage > 0 ? "/collections?page=" + lastPage + limitQueryShow("&") + offsetQueryShow("&") : ""
                                 },
                                 // TODO: implement find function
-                                find: {href: ""}
+                                find: {href: "/collections?"}
                             },
                             countPerPage: limit ? collections.length : limit,
                             totalCount: totalCount,
@@ -80,6 +82,9 @@ router.get('/', function (req, res, next) {
                                 collection: collections
                             }
                         });
+                        console.log(collections);
+
+
                     }
                 }
             )

@@ -14,7 +14,7 @@ var UserSchema = new mongoose.Schema({
         }
     },
     token: {
-      type: String
+        type: String
     },
     password: {
         type: String,
@@ -36,6 +36,9 @@ var UserSchema = new mongoose.Schema({
     timeCreated: {
         type: Date,
         default: Date.now
+    },
+    _links: {
+        type: Object
     }
 }, {versionKey: false});
 
