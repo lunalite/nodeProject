@@ -8,12 +8,9 @@ var passport = require('../config/passport');
 router.get('/', isLoggedIn, function (req, res, next) {
     res.json({
         _links: {
-            self: "/",
-            next: [{
-                href: "/users"
-            }, {
-                href: "/login"
-            }]
+            self: {href: req.originalUrl},
+            users: {href: "/users"},
+            collections: {href: "/login"}
         }
     });
 });

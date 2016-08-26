@@ -1,11 +1,14 @@
 "use strict";
 
 var express = require('express');
+var mongoose = require('mongoose');
 var router = express.Router();
 var Collections = require('../model/collectionModel');
 var isLoggedIn = require('./session').isLoggedInMiddleware;
 var isAdmin = require('./session').isAdminMiddleware;
+var Promise = require('bluebird');
 
+mongoose.Promise = Promise;
 
 router.use('/', isLoggedIn, function (req, res, next) {
     next();
@@ -24,43 +27,65 @@ router.get('/', function (req, res, next) {
         } else {
             return totalCount;
         }
-    }).then(function (totalCount) {
-        Collections.find(
-            {},
-            function (err, collections) {
-                if (err) {
-                    return next(err);
-                } else {
-                    res.json({
-                        _links: {
-                            self: {
-                                href: "/collections"
-                            },
-                            next: [{
-                                href: "/collections/:_id"
-                            }, {
-                                href: "/collections?limit=__&offset=__&page=__"
-                            }, {
-                                // TODO: implement find function
-                                href: ""
-                            }],
-                            back: {
-                                href: "/"
+    }).exec()
+        .then(function (totalCount) {
+            Collections.find(
+                {},
+                function (err, collections) {
+                    if (err) {
+                        return next(err);
+                    } else {
+                        var lastPage = parseInt(Math.ceil((totalCount - offset) / limit), 10);
+                        var pageQueryShow = function (pageOrder) {
+                            if (pageOrder == "next") {
+                                return req.query.page ? "page=" + (page + 1) : "page=2";
+                            } else {
+                                return req.query.page ? "page=" + (page - 1) : "";
                             }
-                        },
-                        countPerPage: limit ? collections.length : limit,
-                        totalCount: totalCount,
-                        page: page,
-                        _embedded: {
-                            collection: collections
-                        }
-                    });
+                        };
+                        var limitQueryShow = function (qualifier) {
+                            return req.query.limit ? qualifier + "limit=" + limit : "";
+                        };
+                        var offsetQueryShow = function (qualifier) {
+                            return req.query.offset ? qualifier + "offset=" + offset : "";
+                        };
+                        res.send({
+                            _links: {
+                                self: {href: req.originalUrl},
+                                first: {
+                                    href: lastPage > 0 ? "/collections?page=1" + limitQueryShow("&") + offsetQueryShow("&") : ""
+                                },
+                                next: {
+                                    href: (page >= lastPage) ? "" : ("/collections?" + (
+                                    req.query.page ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
+                                        req.query.limit ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
+                                            req.query.offset ? pageQueryShow("next") + offsetQueryShow("&") : ""))
+                                },
+                                previous: {
+                                    href: (page <= 1 || page > lastPage) ? "" : ("/collections?" + (
+                                        req.query.page ? pageQueryShow("previous") + limitQueryShow("&") + offsetQueryShow("&") :
+                                            req.query.limit ? pageQueryShow("previous") + limitQueryShow("&") + offsetQueryShow("&") :
+                                                req.query.offset ? pageQueryShow("previous") + offsetQueryShow("&") : ""))
+                                },
+                                last: {
+                                    href: lastPage > 0 ? "/collections?page=" + lastPage + limitQueryShow("&") + offsetQueryShow("&") : ""
+                                },
+                                // TODO: implement find function
+                                find: {href: ""}
+                            },
+                            countPerPage: limit ? collections.length : limit,
+                            totalCount: totalCount,
+                            page: page,
+                            _embedded: {
+                                collection: collections
+                            }
+                        });
+                    }
                 }
-            }
-        )
-            .limit(limit)
-            .skip(totalOffset);
-    });
+            )
+                .limit(limit)
+                .skip(totalOffset);
+        });
 
 });
 
@@ -71,12 +96,8 @@ router.use('/:id', function (req, res, next) {
         res.status(400).send({
             message: "Please enter a valid _id",
             _links: {
-                self: {
-                    href: "/collections/" + req.params.id
-                },
-                back: {
-                    href: "/collections/"
-                }
+                self: {href: req.originalUrl},
+                back: {href: "/collections/"}
             }
         });
     }
@@ -92,12 +113,8 @@ router.get('/:id', function (req, res, next) {
             if (collection) {
                 res.status(200).json({
                     _links: {
-                        self: {
-                            href: "/collections/" + req.params.id
-                        },
-                        back: {
-                            href: "/collections/"
-                        }
+                        self: {href: req.originalUrl},
+                        back: {href: "/collections/"}
                     },
                     collection: collection
                 });
@@ -139,12 +156,8 @@ router.put('/:id', function (req, res, next) {
                     } else {
                         res.json({
                             _links: {
-                                self: {
-                                    href: "/collections/" + req.params.id
-                                },
-                                back: {
-                                    href: "/collections/"
-                                }
+                                self: {href: req.originalUrl},
+                                back: {href: "/collections/"}
                             },
                             collection: dbCollection
                         });

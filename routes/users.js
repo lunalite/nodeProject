@@ -7,6 +7,10 @@ var Users = mongoose.model('Users');
 var isLoggedIn = require('./session').isLoggedInMiddleware;
 var isAdmin = require('./session').isAdminMiddleware;
 var Utils = require('../utils');
+var assert = require('assert');
+var Promise = require('bluebird');
+
+mongoose.Promise = Promise;
 
 router.use('/', isLoggedIn, isAdmin, function (req, res, next) {
     next();
@@ -25,43 +29,65 @@ router.get('/', function (req, res, next) {
         } else {
             return totalCount;
         }
-    }).then(function (totalCount) {
-        Users.find(
-            {},
-            function (err, users) {
-                if (err) {
-                    res.status(204).send(err);
-                } else {
-                    res.json({
-                        _links: {
-                            self: {
-                                href: "/users"
-                            },
-                            next: [{
-                                href: "/users/:_id"
-                            }, {
-                                href: "/users?limit=__&offset=__&page=__"
-                            }, {
-                                // TODO: implement find function
-                                href: ""
-                            }],
-                            back: {
-                                href: "/"
+    }).exec()
+        .then(function (totalCount) {
+            Users.find(
+                {},
+                function (err, users) {
+                    if (err) {
+                        res.status(204).send(err);
+                    } else {
+                        var lastPage = parseInt(Math.ceil((totalCount - offset) / limit), 10);
+                        var pageQueryShow = function (pageOrder) {
+                            if (pageOrder == "next") {
+                                return req.query.page ? "page=" + (page + 1) : "page=2";
+                            } else {
+                                return req.query.page ? "page=" + (page - 1) : "";
                             }
-                        },
-                        countPerPage: limit ? users.length : limit,
-                        totalCount: totalCount,
-                        page: page,
-                        _embedded: {
-                            user: users
-                        }
-                    });
+                        };
+                        var limitQueryShow = function (qualifier) {
+                            return req.query.limit ? qualifier + "limit=" + limit : "";
+                        };
+                        var offsetQueryShow = function (qualifier) {
+                            return req.query.offset ? qualifier + "offset=" + offset : "";
+                        };
+                        res.send({
+                            _links: {
+                                self: {href: req.originalUrl},
+                                first: {
+                                    href: lastPage > 0 ? "/users?page=1" + limitQueryShow("&") + offsetQueryShow("&") : ""
+                                },
+                                next: {
+                                    href: (page >= lastPage) ? "" : ("/users?" + (
+                                        req.query.page ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
+                                            req.query.limit ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
+                                                req.query.offset ? pageQueryShow("next") + offsetQueryShow("&") : ""))
+                                },
+                                previous: {
+                                    href: (page <= 1 || page > lastPage) ? "" : ("/users?" + (
+                                        req.query.page ? pageQueryShow("previous") + limitQueryShow("&") + offsetQueryShow("&") :
+                                            req.query.limit ? pageQueryShow("previous") + limitQueryShow("&") + offsetQueryShow("&") :
+                                                req.query.offset ? pageQueryShow("previous") + offsetQueryShow("&") : ""))
+                                },
+                                last: {
+                                    href: lastPage > 0 ? "/users?page=" + lastPage + limitQueryShow("&") + offsetQueryShow("&") : ""
+                                },
+                                // TODO: implement find function
+                                find: {href: ""}
+                            },
+                            countPerPage: limit ? users.length : limit,
+                            totalCount: totalCount,
+                            page: page,
+                            _embedded: {
+                                users: users
+                            }
+                        });
+                    }
                 }
-            }
-        )
-            .limit(limit)
-            .skip(totalOffset);
-    });
+            )
+                .limit(limit)
+                .skip(totalOffset);
+        });
 });
 
 router.get('/:id', function (req, res, next) {

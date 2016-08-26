@@ -12,15 +12,9 @@ router.get('/', function (req, res, next) {
     res.json({
         Message: "Please log in through the local page",
         _links: {
-            self: {
-                href: "/login"
-            },
-            next: [{
-                    href: "/login/local"
-                }],
-            back: {
-                    href: "/"
-            }
+            self: {href: req.originalUrl},
+            next: {href: "/login/local"},
+            back: {href: "/"}
         }
     });
 });
@@ -69,7 +63,7 @@ router.get('/local', function (req, res, next) {
             username: "Your username",
             password: "Your password",
             _links: {
-                self: "/login/local"
+                self: {href: req.originalUrl},
             }
         });
     }
@@ -105,7 +99,7 @@ router.post('/local',
                     } else {
                         res.json({
                             _links: {
-                                self: {href: "/users/" + user._id},
+                                self: {href: req.originalUrl},
                                 next: {href: "/"}
                             },
                             token: token,
