@@ -4,7 +4,7 @@ var express = require('express');
 var router = express.Router();
 var passport = require('../config/passport');
 var jwt = require('jsonwebtoken');
-var config = require('../config/config');
+var config = require('../config');
 var mongoose = require('mongoose');
 var Users = mongoose.model('Users');
 

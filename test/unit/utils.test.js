@@ -1,7 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var config = require('../../config/config');
+var config = require('../../config');
 var Users = require('../../model/userModel');
 var Collections = require('../../model/collectionModel');
 var Utils = require('../../utils');

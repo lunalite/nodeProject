@@ -7,7 +7,7 @@ var app = require('../../app');
 var should = require('should');
 var mongoose = require('mongoose');
 var Users = mongoose.model('Users');
-var config = require('../../config/config');
+var config = require('../../config');
 
 /*
  ** Start of Tests

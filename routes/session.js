@@ -1,6 +1,6 @@
 "use strict";
 
-var config = require('../config/config');
+var config = require('../config');
 var mongoose = require('mongoose');
 var Users = mongoose.model('Users');
 var passport = require('../config/passport');

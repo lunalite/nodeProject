@@ -135,38 +135,32 @@ router.post('/', function (req, res, next) {
                 }
             }
         });
-    }
-
-    var user = new Users({
-        userName: req.body.userName,
-        phoneNumber: req.body.phoneNumber,
-        password: Utils.encryptPassword(passwordFromReq),
-        isAdmin: req.body.isAdmin ? req.body.isAdmin : false
-    });
-    user.save(function (err) {
-        if (err) {
-            res.status(400).send(err);
-        }
-        return new Promise(function (resolve, reject) {
-            resolve(Users.update({_id: user._id},
-                {_links: {self: {href: "/users/" + user._id}}},
-                function (err) {
-                    if (err) {
-                        return err;
-                    }
-                }));
+    } else {
+        var user = new Users({
+            userName: req.body.userName,
+            phoneNumber: req.body.phoneNumber,
+            password: Utils.encryptPassword(passwordFromReq),
+            isAdmin: req.body.isAdmin ? req.body.isAdmin : false
         });
-    }).then(function (err) {
-        if (err) {
-            next(err);
-        }
-        res.status(201).send({
-            user: user,
-            _links: {
-                self: {href: "/users/" + user._id}
+        user.save(function (err) {
+            if (err) {
+                res.status(400).send(err);
             }
+            return new Promise(function (resolve, reject) {
+                resolve(Users.update({_id: user._id},
+                    {_links: {self: {href: "/users/" + user._id}}}));
+            });
+        }).then(function () {
+            res.status(201).send({
+                user: user,
+                _links: {
+                    self: {href: "/users/" + user._id}
+                }
+            });
+        }).catch(function (error) {
+            next(error);
         });
-    });
+    }
 });
 
 router.put('/:id', function (req, res, next) {

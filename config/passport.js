@@ -5,7 +5,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var Users = require('../model/userModel');
 var jwt = require('jsonwebtoken');
-var config = require('./config');
+var config = require('./index');
 var Utils = require('../utils');
 passport.use(new LocalStrategy({
         passReqToCallback: true

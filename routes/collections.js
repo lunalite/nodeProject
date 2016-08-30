@@ -1,14 +1,10 @@
 "use strict";
 
 var express = require('express');
-var mongoose = require('mongoose');
 var router = express.Router();
 var Collections = require('../model/collectionModel');
 var isLoggedIn = require('./session').isLoggedInMiddleware;
 var isAdmin = require('./session').isAdminMiddleware;
-var Promise = require('bluebird');
-
-mongoose.Promise = Promise;
 
 router.use('/', isLoggedIn, function (req, res, next) {
     next();
@@ -82,9 +78,6 @@ router.get('/', function (req, res, next) {
                                 collection: collections
                             }
                         });
-                        console.log(collections);
-
-
                     }
                 }
             )
@@ -98,6 +91,7 @@ router.use('/:id', function (req, res, next) {
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
         return next();
     } else {
+
         res.status(400).send({
             message: "Please enter a valid _id",
             _links: {
@@ -131,17 +125,28 @@ router.get('/:id', function (req, res, next) {
 });
 
 router.post('/', function (req, res, next) {
+
+    //TODO: Add parser check for name
     var collection = new Collections({
         name: req.body.name,
-        description: req.body.description
+        description: req.body.description ? req.body.description : ""
     });
-    collection.save(function (err) {
-        if (err) {
+    collection.saveAsync()
+        .then(function () {
+            console.log('test');
+            Collections.update({_id: collection._id},
+                {_links: {self: {href: "/collections/" + collection._id}}}, function () {
+                    res.status(201).send({
+                        collection: collection,
+                        _links: {
+                            self: {href: "/collections/" + collection._id}
+                        }
+                    });
+                });
+        })
+        .catch(function (err) {
             res.status(400).send(err);
-        } else {
-            res.status(201).send(collection);
-        }
-    });
+        });
 });
 
 router.put('/:id', function (req, res, next) {

@@ -1,6 +1,7 @@
 "use strict";
-
-var mongoose = require('mongoose');
+var mongoose2 = require('mongoose');
+var Promise = require('bluebird');
+var mongoose = Promise.promisifyAll(require('mongoose'));
 
 var CollectionSchema = new mongoose.Schema({
     name: {
@@ -13,6 +14,9 @@ var CollectionSchema = new mongoose.Schema({
     timeCreated: {
         type: Date,
         default: Date.now
+    },
+    _links: {
+        type: Object
     }
 }, {versionKey: false});
 

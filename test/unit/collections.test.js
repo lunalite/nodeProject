@@ -87,7 +87,7 @@ describe('Running collections unit test', function() {
             });
         });
 
-        describe('POST /collections/:id', function () {
+        describe('POST /collections', function () {
             it('should create a new item successfully with just the name', function (done) {
                 request(app)
                     .post('/collections')
@@ -96,7 +96,7 @@ describe('Running collections unit test', function() {
                         name: "testProd2"
                     })
                     .expect(function (res) {
-                        res.body.name.should.equal("testProd2");
+                        res.body.collection.name.should.equal("testProd2");
                     })
                     .expect(201, done);
             });
@@ -110,8 +110,8 @@ describe('Running collections unit test', function() {
                         description: "This is a testprod2"
                     })
                     .expect(function (res) {
-                        res.body.name.should.equal("testProd2");
-                        res.body.description.should.equal("This is a testprod2");
+                        res.body.collection.name.should.equal("testProd2");
+                        res.body.collection.description.should.equal("This is a testprod2");
                     })
                     .expect(201, done);
             });
@@ -201,16 +201,15 @@ describe('Running collections unit test', function() {
     });
 
     function collectionsIdQuery(_name, callback) {
-        Collections.findOne({name: _name})
-            .exec(function (err, user) {
-                if (err) {
-                    callback(err, null);
-                } else if (user == null) {
-                    callback(null, null);
-                } else {
-                    callback(null, user._id);
-                }
-            });
+        Collections.findOne({name: _name}, function(err, user) {
+            if (err) {
+                callback(err, null);
+            } else if (user == null) {
+                callback(null, null);
+            } else {
+                callback(null, user._id);
+            }
+        });
     }
 
 });

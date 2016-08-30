@@ -1,7 +1,7 @@
 "use strict";
 
 var crypto = require('crypto');
-var config = require('./config/config');
+var config = require('./config');
 
 module.exports.encryptPassword = function (passwordFromReq) {
     var cipher = crypto.createCipher('aes192', config.secret);
