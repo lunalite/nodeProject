@@ -3,10 +3,12 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
-var Users = require('../model/userModel');
 var jwt = require('jsonwebtoken');
-var config = require('./index');
-var Utils = require('../utils');
+var config = require('../config');
+var Utils = require('../util/util');
+var Users = require('../model/userModel');
+// var Users = require('mongoose').model('Users');
+
 passport.use(new LocalStrategy({
         passReqToCallback: true
     },

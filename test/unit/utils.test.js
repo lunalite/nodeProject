@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var config = require('../../config');
 var Users = require('../../model/userModel');
 var Collections = require('../../model/collectionModel');
-var Utils = require('../../utils');
+var Utils = require('../../util/util');
 var assert = require('assert');
 var should = require('should');
 

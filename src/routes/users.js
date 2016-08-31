@@ -4,9 +4,9 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
 var Users = mongoose.model('Users');
-var isLoggedIn = require('./session').isLoggedInMiddleware;
-var isAdmin = require('./session').isAdminMiddleware;
-var Utils = require('../utils');
+var isLoggedIn = require('./../sessionHandler').isLoggedInMiddleware;
+var isAdmin = require('./../sessionHandler').isAdminMiddleware;
+var Utils = require('../util/util');
 var assert = require('assert');
 var Promise = require('bluebird');
 

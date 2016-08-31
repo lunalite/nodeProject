@@ -3,7 +3,7 @@
 var request = require('supertest');
 var assert = require('chai').assert;
 var expect = require('chai').expect;
-var app = require('../../app');
+var app = require('../../src/app');
 var should = require('should');
 var mongoose = require('mongoose');
 var Users = mongoose.model('Users');
@@ -88,7 +88,7 @@ describe('Running users unit test', function () {
     });
 
 
-    var Utils = require('../../utils');
+    var Utils = require('../../util/util');
     describe('Authenticated userTest', function () {
         var token;
 
