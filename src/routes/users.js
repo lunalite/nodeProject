@@ -9,7 +9,7 @@ var isAdmin = require('./../handler/sessionHandler').isAdminMiddleware;
 var Util = require('../util/util');
 var User = require('../../model/UserSchema');
 
-router.use('/', /*isLoggedIn, isAdmin,*/ function (req, res, next) {
+router.use('/', isLoggedIn, isAdmin, function (req, res, next) {
     next();
 });
 
@@ -87,23 +87,21 @@ router.get('/', function (req, res, next) {
 
 router.get('/:id', function (req, res, next) {
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-        db.collection('users').findOne({_id: mongoClient.objectifyId(req.params.id)}, function (err, user) {
-            if (err) {
-                return next(err);
-            } else {
-                console.log(user);
-                if (user) {
-                    res.json({
-                        _links: {
-                            back: {href: "/users/"}
-                        },
-                        user: user
-                    });
+        db.collection('users').findOne({_id: mongoClient.objectifyId(req.params.id)},
+            function (err, user) {
+                if (err) {
+                    return next(err);
                 } else {
-                    res.status(204).send();
+                    console.log(user);
+                    if (user) {
+                        res.json({
+                            user: user
+                        });
+                    } else {
+                        res.status(204).send();
+                    }
                 }
-            }
-        });
+            });
     } else {
         enterValidId(req, res);
     }
@@ -146,56 +144,56 @@ router.post('/', function (req, res, next) {
 
 router.put('/:id', function (req, res, next) {
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-        db.collection('users').findById(req.params.id, function (err, user) {
-            if (err) {
-                return next(err);
-            } else {
-                if (user) {
-                    var updatedUser = {
-                        username: req.body.username ? req.body.username : user.username,
-                        phoneNumber: req.body.phoneNumber ? req.body.phoneNumber : user.phoneNumber,
-                        password: req.body.password ? req.body.password : user.password,
-                        isAdmin: req.body.isAdmin ? req.body.isAdmin : user.isAdmin
-                    };
-
-                    Users.findOneAndUpdate({_id: user._id}, updatedUser, {new: true}, function (err, dbUser) {
-                        if (err) {
-                            res.statusCode = 400;
-                            return next(err);
-                        } else {
-                            res.json({
-                                _links: {
-                                    self: {
-                                        href: "/users/" + req.params.id
-                                    },
-                                    back: {
-                                        href: "/users/"
-                                    }
-                                },
-                                user: dbUser
-                            });
-                        }
-                    });
+        db.collection('users').findOne({_id: mongoClient.objectifyId(req.params.id)},
+            function (err, user) {
+                if (err) {
+                    return next(err);
                 } else {
-                    res.status(204).send();
+                    if (user) {
+                        var updatedUser = {
+                            username: req.body.username ? req.body.username : user.username,
+                            password: req.body.password ? Util.encryptPassword(req.body.password) : user.password,
+                            phoneNumber: req.body.phoneNumber ? req.body.phoneNumber : user.phoneNumber,
+                            token: user.token,
+                            isAdmin: req.body.isAdmin ? req.body.isAdmin : user.isAdmin,
+                            timeCreated: user.timeCreated,
+                            lastUpdated: ( req.body.username || req.body.phoneNumber || req.body.password || req.body.isAdmin) ?
+                                Date.now() : user.lastUpdated,
+                            _links: user._links
+                        };
+
+                        db.collection('users').findOneAndUpdate({_id: mongoClient.objectifyId(req.params.id)},
+                            updatedUser,
+                            {returnOriginal: false},
+                            function (err, dbUser) {
+                                if (err) {
+                                    res.statusCode = 400;
+                                    return next(err);
+                                } else {
+                                    res.json({
+                                        user: dbUser.value
+                                    });
+                                }
+                            });
+                    } else {
+                        res.status(204).send();
+                    }
                 }
-            }
-        });
+            });
     } else {
         enterValidId(req, res);
     }
 });
 
 router.delete('/:id', function (req, res, next) {
-    db.collection('users').remove({
-        _id: req.params.id
-    }, function (err, user) {
-        if (err) {
-            res.status(204).send(err);
-        } else {
-            res.status(204).send();
-        }
-    });
+    db.collection('users').findOneAndDelete({_id: mongoClient.objectifyId(req.params.id)},
+        function (err, user) {
+            if (err) {
+                res.status(204).send(err);
+            } else {
+                res.status(204).send();
+            }
+        });
 });
 
 function enterValidId(req, res) {

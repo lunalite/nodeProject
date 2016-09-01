@@ -5,7 +5,6 @@
 describe('Starting Unit tests', function () {
     before(function(done) {
         require('./unit/utils.test.js');
-        require('../model/modelSubscription').initialize();
         done();
     });
 
