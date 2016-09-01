@@ -92,7 +92,7 @@ router.get('/:id', function (req, res, next) {
                 if (err) {
                     return next(err);
                 } else {
-                    console.log(user);
+                    // console.log(user);
                     if (user) {
                         res.json({
                             user: user

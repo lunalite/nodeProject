@@ -5,7 +5,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var db = require('../../bin/mongoClient').getDb();
 var jwt = require('jsonwebtoken');
-var config = require('./../../config/index');
+var config = require('./../../config');
 var Utils = require('../util/util');
 
 passport.use(new LocalStrategy({
@@ -22,6 +22,7 @@ passport.use(new LocalStrategy({
             if ((Utils.decryptPassword(user.password)) != password) {
                 return done(null, false, {message: 'Incorrect password.'});
             }
+
             return done(null, user);
         });
     }
@@ -48,12 +49,10 @@ passport.use(new BearerStrategy(
 ));
 
 passport.serializeUser(function (user, done) {
-    console.log(user);
     done(null, user._id);
 });
 
 passport.deserializeUser(function (_id, done) {
-    console.log(_id);
     db.collection('users').findOne({_id: _id}, function (err, user) {
         done(err, user);
     });

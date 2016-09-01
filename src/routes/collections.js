@@ -122,14 +122,16 @@ router.post('/', function (req, res, next) {
         req.body.name,
         req.body.description ? req.body.description : ""
     );
-
     collection.insertOne(function (err, result) {
         if (err) {
-            res.status(400).send(err);
+            res.status(400).send({
+                error: err.message
+            });
+        } else {
+            res.status(201).send({
+                collection: result.value
+            });
         }
-        res.status(201).send({
-            collection: result.value
-        });
     });
 });
 

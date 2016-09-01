@@ -4,32 +4,27 @@ var request = require('supertest');
 var assert = require('chai').assert;
 var expect = require('chai').expect;
 var should = require('should');
-var mongoose = require('mongoose');
+var app;
+var db;
+var Collection = require('../../model/CollectionSchema');
 
-describe('Running collections unit test', function() {
+describe('Running collections unit test', function () {
+
     before(function (done) {
-        var app = require('../../app');
-        var Collections = mongoose.model('Collections');
-        console.log("Running Collections pre-test configuration...");
+        app = require('../../app');
+        db = require('../../bin/mongoClient').getDb();
 
-        var CollectionArray = [{
-            name: "testProd",
-            description: "This is a test production"
-        }, {
-            name: "deleteProd",
-            description: "This prod is gonna be deleted"
-        }];
-        Collections.create(CollectionArray, function (err, CollectionArray) {
-            if (err) {
-                return preTestComplete(err);
-            } else {
-                return preTestComplete(null);
-            }
-        });
-        function preTestComplete(err) {
-            console.log("Collections pre-test configuration done...");
-            done(err);
+        var collectionArray = [new Collection("testProd", "This is a test production"),
+            new Collection("deleteProd", "This prod is gonna be deleted")];
+
+        for (var i = 0; i < collectionArray.length; i++) {
+            collectionArray[i].insertOne(db, function (err, collection) {
+                if (err) {
+                    return done(err);
+                }
+            });
         }
+        return done(null);
     });
 
 
@@ -121,7 +116,7 @@ describe('Running collections unit test', function() {
                     .post('/collections')
                     .set('authorization', 'bearer ' + tokenNonAdmin)
                     .expect(function (res) {
-                        res.body.errors.name.message.should.equal("missingName");
+                        res.body.error.should.equal("missingName");
                     })
                     .expect(400, done);
             });
@@ -142,13 +137,12 @@ describe('Running collections unit test', function() {
                     }
                 });
             });
-            after(function() {
+            after(function () {
                 it('should not be able to GET the collection\n', function (done) {
                     collectionsIdQuery("testProd2", function (err, data) {
                         if (err) {
                             return done(err);
                         } else {
-                            console.log(data);
                             return request(app)
                                 .get('/collections/' + deletedId)
                                 .set('collections', 'bearer ' + tokenNonAdmin)
@@ -201,13 +195,13 @@ describe('Running collections unit test', function() {
     });
 
     function collectionsIdQuery(_name, callback) {
-        Collections.findOne({name: _name}, function(err, user) {
+        db.collection('collections').findOne({name: _name}, function (err, collection) {
             if (err) {
                 callback(err, null);
-            } else if (user == null) {
+            } else if (collection == null) {
                 callback(null, null);
             } else {
-                callback(null, user._id);
+                callback(null, collection._id);
             }
         });
     }

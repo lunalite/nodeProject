@@ -25,8 +25,8 @@ router.get('/local', function (req, res, next) {
         var secondCheck = req.header("authorization").split(regex);
         if (secondCheck[1]) {
             db.collection('users').findOne({token: secondCheck[1]}, function (err, user) {
-                console.log(secondCheck[1]);
-                console.log(user);
+                // console.log(secondCheck[1]);
+                // console.log(user);
                 if (err) {
                     next(err);
                 } else if (!user) {
@@ -92,12 +92,16 @@ router.post('/local',
             } else {
                 db.collection('users').findOneAndUpdate(
                     {_id: mongoClient.objectifyId(decoded._id)},
-                    {$set: {token: token}},
-                    {upsert: true, returnOriginal: false},
+                    {
+                        $set: {
+                            lastUpdated: Date.now(),
+                            token: token
+                        }
+                    },
+                    {returnOriginal: false},
                     function (err, user) {
                         if (err) {
-                            res.statusCode = 204;
-                            res.send();
+                            res.status(204).send();
                         } else {
                             res.json({
                                 _links: {

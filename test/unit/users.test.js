@@ -4,15 +4,21 @@ var request = require('supertest');
 var assert = require('chai').assert;
 var expect = require('chai').expect;
 var should = require('should');
-var mongoose = require('mongoose');
 var config = require('../../config');
-var app = require('../../app');
+var app;
+var db;
+var Util = require('../../src/util/util');
 
 /*
  ** Start of Tests
  */
 
 describe('Running users unit test', function () {
+    before(function (done) {
+        app = require('../../app');
+        db = require('../../bin/mongoClient').getDb()
+        done();
+    });
 
     describe('Unauthenticated userTest', function () {
         describe('GET /** redirection', function () {
@@ -63,9 +69,9 @@ describe('Running users unit test', function () {
         describe('POST /login/local with wrong credentials', function () {
             it('should return 401 when wrong username/password is used', function (done) {
                 request(app)
-                    .post("/login/local")
+                    .post('/login/local')
                     .send('username=testNamePut')
-                    .send('password=qwe123QWE1')
+                    .send('password=123qweQwe')
                     .expect(401, done);
             });
 
@@ -88,7 +94,6 @@ describe('Running users unit test', function () {
     });
 
 
-    var Utils = require('../../src/util/util');
     describe('Authenticated userTest', function () {
         var token;
 
@@ -107,21 +112,8 @@ describe('Running users unit test', function () {
         });
 
         describe('Authenticating bearer tokens', function () {
-            it('should return enter bearer within error message', function (done) {
-                request(app)
-                    .get('/login/local')
-                    .set('authorization', 'bearer ' + token)
-                    .expect(function (res) {
-                        res.body.Message.should.equal('You are authenticated.');
-                        res.body.user.userName.should.equal('testNamePut');
-                        should.exist(res.body.user.tokenStartTime);
-                        var startDate = new Date(res.body.user.tokenStartTime);
-                        var endDate = startDate;
-                        endDate.setHours(startDate.getHours() + parseInt(config.jwtExpiryTime));
-                        res.body.user.tokenEndTime.should.equal(endDate.toString());
-                    })
-                    .expect(200, done);
-            });
+
+
         });
 
         describe('HTTP requests', function () {
@@ -182,7 +174,7 @@ describe('Running users unit test', function () {
                     .set('authorization', 'bearer ' + token)
                     .type('json')
                     .send({
-                        username: "test-Name",
+                        username: "testName",
                         password: "123qwe"
                     })
                     .expect(function (res) {
@@ -196,7 +188,7 @@ describe('Running users unit test', function () {
                     .set('authorization', 'bearer ' + token)
                     .type('json')
                     .send({
-                        userName: "test-Name",
+                        username: "testNameX",
                         password: "test123TEST",
                         phoneNumber: 12345678
                     })
@@ -206,7 +198,7 @@ describe('Running users unit test', function () {
 
         describe('GET /users/:id', function () {
             it('should respond with posted user\n', function (done) {
-                userIdQuery("test-Name", function (err, _id) {
+                userIdQuery("testNameX", function (err, _id) {
                     if (err) {
                         return done(err);
                     } else {
@@ -215,10 +207,10 @@ describe('Running users unit test', function () {
                             .set('authorization', 'bearer ' + token)
                             .expect('Content-Type', /json/)
                             .expect(function (res) {
-                                res.body._links.self.href.should.equal("/users/" + _id, "_links/self/href is wrong");
-                                res.body.user.userName.should.equal("test-Name", "userName is wrong");
+                                // console.log(res);
+                                res.body.user.username.should.equal("testNameX", "userName is wrong");
                                 res.body.user.phoneNumber.should.equal(12345678, "phoneNumber is wrong");
-                                res.body.user.password.should.equal(Utils.encryptPassword("test123TEST"), "password is wrong");
+                                res.body.user.password.should.equal(Util.encryptPassword("test123TEST"), "password is wrong");
                             })
                             .expect(200, done);
                     }
@@ -251,13 +243,12 @@ describe('Running users unit test', function () {
                             .set('authorization', 'bearer ' + token)
                             .type('json')
                             .send({
-                                userName: "Felicia",
+                                username: "Felicia",
                                 phoneNumber: 99998888
                             })
                             .expect('Content-Type', /json/)
                             .expect(function (res) {
-                                res.body._links.self.href.should.equal("/users/" + _id, "_links/self/href is wrong");
-                                res.body.user.userName.should.equal("Felicia", "userName is wrong");
+                                res.body.user.username.should.equal("Felicia", "userName is wrong");
                                 res.body.user.phoneNumber.should.equal(99998888, "phoneNumber is wrong");
                             })
                             .expect(200, done);
@@ -318,9 +309,8 @@ describe('Running users unit test', function () {
     /*
      ** Functions to increase code readability
      */
-    function userIdQuery(_userName, callback) {
-        Users.findOne({userName: _userName})
-            .exec(function (err, user) {
+    function userIdQuery(_username, callback) {
+        db.collection('users').findOne({username: _username}, function (err, user) {
                 if (err) {
                     callback(err, null);
                 } else if (user == null) {
