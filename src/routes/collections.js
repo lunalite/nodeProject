@@ -2,9 +2,9 @@
 
 var express = require('express');
 var router = express.Router();
-var Collections = require('../model/collectionModel');
-var isLoggedIn = require('./session').isLoggedInMiddleware;
-var isAdmin = require('./session').isAdminMiddleware;
+// var Collections = require('mongoose').model('Collections');
+var isLoggedIn = require('./../handler/sessionHandler').isLoggedInMiddleware;
+var isAdmin = require('./../handler/sessionHandler').isAdminMiddleware;
 
 router.use('/', isLoggedIn, function (req, res, next) {
     next();

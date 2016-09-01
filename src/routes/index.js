@@ -2,8 +2,8 @@
 
 var express = require('express');
 var router = express.Router();
-var isLoggedIn = require('./session').isLoggedInMiddleware;
-var passport = require('../config/passport');
+var isLoggedIn = require('./../handler/sessionHandler').isLoggedInMiddleware;
+var passport = require('../controller/passportController');
 
 router.get('/', isLoggedIn, function (req, res, next) {
     res.json({

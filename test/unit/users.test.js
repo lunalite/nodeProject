@@ -3,17 +3,17 @@
 var request = require('supertest');
 var assert = require('chai').assert;
 var expect = require('chai').expect;
-var app = require('../../app');
 var should = require('should');
 var mongoose = require('mongoose');
-var Users = mongoose.model('Users');
 var config = require('../../config');
+var app = require('../../app');
 
 /*
  ** Start of Tests
  */
 
 describe('Running users unit test', function () {
+
     describe('Unauthenticated userTest', function () {
         describe('GET /** redirection', function () {
             it('GET / should lead to /login page', function (done) {
@@ -88,7 +88,7 @@ describe('Running users unit test', function () {
     });
 
 
-    var Utils = require('../../utils');
+    var Utils = require('../../src/util/util');
     describe('Authenticated userTest', function () {
         var token;
 

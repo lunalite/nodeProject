@@ -3,13 +3,13 @@
 var request = require('supertest');
 var assert = require('chai').assert;
 var expect = require('chai').expect;
-var app = require('../../app');
 var should = require('should');
 var mongoose = require('mongoose');
-var Collections = mongoose.model('Collections');
 
 describe('Running collections unit test', function() {
     before(function (done) {
+        var app = require('../../app');
+        var Collections = mongoose.model('Collections');
         console.log("Running Collections pre-test configuration...");
 
         var CollectionArray = [{

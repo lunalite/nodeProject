@@ -6,12 +6,12 @@ var session = require('express-session');
 var config = require('./config');
 var path = require('path');
 var bodyParser = require('body-parser');
-var passport = require('./config/passport');
+var passport = require('./src/controller/passportController');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var login = require('./routes/login');
-var collections = require('./routes/collections');
+var routes = require('./src/routes/index');
+var users = require('./src/routes/users');
+var login = require('./src/routes/login');
+var collections = require('./src/routes/collections');
 
 var app = express();
 
