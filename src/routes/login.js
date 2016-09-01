@@ -2,11 +2,11 @@
 
 var express = require('express');
 var router = express.Router();
-var passport = require('../config/passport');
+var passport = require('../controller/passportController');
 var jwt = require('jsonwebtoken');
-var config = require('../config');
-var mongoose = require('mongoose');
-var Users = mongoose.model('Users');
+var config = require('../../config');
+var mongoClient = require('../../bin/mongoClient');
+var db = mongoClient.getDb();
 
 router.get('/', function (req, res, next) {
     res.json({
@@ -24,7 +24,9 @@ router.get('/local', function (req, res, next) {
         var regex = /bearer /;
         var secondCheck = req.header("authorization").split(regex);
         if (secondCheck[1]) {
-            Users.findOne({token: secondCheck[1]}, function (err, user) {
+            db.collection('users').findOne({token: secondCheck[1]}, function (err, user) {
+                console.log(secondCheck[1]);
+                console.log(user);
                 if (err) {
                     next(err);
                 } else if (!user) {
@@ -40,7 +42,7 @@ router.get('/local', function (req, res, next) {
                                 Message: "You are authenticated.",
                                 user: {
                                     _id: decoded._id,
-                                    userName: decoded.userName,
+                                    username: decoded.username,
                                     phoneNumber: decoded.phoneNumber,
                                     tokenStartTime: new Date(decoded.iat * 1000).toString(),
                                     tokenEndTime: new Date(decoded.exp * 1000).toString()
@@ -63,7 +65,7 @@ router.get('/local', function (req, res, next) {
             username: "Your username",
             password: "Your password",
             _links: {
-                self: {href: req.originalUrl},
+                self: {href: req.originalUrl}
             }
         });
     }
@@ -74,12 +76,9 @@ router.get('/local', function (req, res, next) {
 router.post('/local',
     passport.authenticate('local', {session: false}),
     function (req, res, next) {
-        //console.log('successful' + req.user);
-        //console.log('user is authenticated: ' + req.isAuthenticated());
-
         var pseudoUser = {
             _id: req.user._id,
-            userName: req.user.userName,
+            username: req.user.username,
             password: req.user.password,
             phoneNumber: req.user.phoneNumber
         };
@@ -87,30 +86,33 @@ router.post('/local',
         var token = jwt.sign(pseudoUser, config.secret, {
             expiresIn: config.jwtExpiryTime
         });
-
         jwt.verify(token, config.secret, function (err, decoded) {
             if (err) {
                 next(err);
             } else {
-                Users.findByIdAndUpdate(decoded._id, {$set: {token: token}}, function (err, user) {
-                    if (err) {
-                        res.statusCode = 204;
-                        res.send();
-                    } else {
-                        res.json({
-                            _links: {
-                                self: {href: req.originalUrl},
-                                next: {href: "/"}
-                            },
-                            token: token,
-                            expiresIn: config.jwtExpiryTime,
-                            message: "Please use token as bearer for authentication purposes by passing it" +
-                            " in the header with key value 'Authorization'",
-                            authentication: "Send a GET request to /login/local with bearer token to authenticate if" +
-                            " token is right"
-                        });
-                    }
-                });
+                db.collection('users').findOneAndUpdate(
+                    {_id: mongoClient.objectifyId(decoded._id)},
+                    {$set: {token: token}},
+                    {upsert: true, returnOriginal: false},
+                    function (err, user) {
+                        if (err) {
+                            res.statusCode = 204;
+                            res.send();
+                        } else {
+                            res.json({
+                                _links: {
+                                    self: {href: req.originalUrl},
+                                    next: {href: "/"}
+                                },
+                                token: token,
+                                expiresIn: config.jwtExpiryTime,
+                                message: "Please use token as bearer for authentication purposes by passing it" +
+                                " in the header with key value 'Authorization'",
+                                authentication: "Send a GET request to /login/local with bearer token to authenticate if" +
+                                " token is right"
+                            });
+                        }
+                    });
             }
         });
     });

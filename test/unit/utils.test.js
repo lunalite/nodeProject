@@ -2,9 +2,7 @@
 
 var mongoose = require('mongoose');
 var config = require('../../config');
-var Users = require('../../model/userModel');
-var Collections = require('../../model/collectionModel');
-var Utils = require('../../utils');
+var Utils = require('../../src/util/util');
 var assert = require('assert');
 var should = require('should');
 
@@ -24,6 +22,7 @@ describe('Beginning utils testing', function () {
         });
 
         mongoose.connection.on('open', function (err) {
+
             console.log("Running Users pre-test configuration...");
             mongoose.connection.db.listCollections().toArray(function (err, names) {
                 if (err) {
@@ -80,6 +79,7 @@ function createUser(done) {
         phoneNumber: 22331122,
         isAdmin: 1
     }];
+    var Users = mongoose.model('Users');
     Users.create(userArray, function (err, createdUsers) {
         if (err) {
             return done(err);

@@ -3,15 +3,16 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
-var Users = require('../model/userModel');
+var db = require('../../bin/mongoClient').getDb();
 var jwt = require('jsonwebtoken');
-var config = require('./index');
-var Utils = require('../utils');
+var config = require('./../../config/index');
+var Utils = require('../util/util');
+
 passport.use(new LocalStrategy({
         passReqToCallback: true
     },
     function (req, username, password, done) {
-        Users.findOne({userName: username}, function (err, user) {
+        db.collection('users').findOne({username: username}, function (err, user) {
             if (err) {
                 return done(err);
             }
@@ -28,7 +29,7 @@ passport.use(new LocalStrategy({
 
 passport.use(new BearerStrategy(
     function (token, done) {
-        Users.findOne({token: token}, function (err, user) {
+        db.collection('users').findOne({token: token}, function (err, user) {
             if (err) {
                 return done(err);
             }
@@ -37,7 +38,7 @@ passport.use(new BearerStrategy(
             }
             jwt.verify(token, config.secret, function (err, decoded) {
                 if (err) {
-                    return done(null, false, {message: "Expired jwt"});
+                    return done(null, false, {message: 'Expired jwt'});
                 } else {
                     return done(null, user, {scope: 'read'});
                 }
@@ -47,11 +48,13 @@ passport.use(new BearerStrategy(
 ));
 
 passport.serializeUser(function (user, done) {
+    console.log(user);
     done(null, user._id);
 });
 
 passport.deserializeUser(function (_id, done) {
-    Users.findById(_id, function (err, user) {
+    console.log(_id);
+    db.collection('users').findOne({_id: _id}, function (err, user) {
         done(err, user);
     });
 });
