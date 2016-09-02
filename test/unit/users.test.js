@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 var request = require('supertest');
 var assert = require('chai').assert;
@@ -16,7 +16,7 @@ var Util = require('../../src/util/util');
 describe('Running users unit test', function () {
     before(function (done) {
         app = require('../../src/app');
-        db = require('../../bin/mongoClient').getDb();
+        db = require('../../bin/mongoClient').getDb()
         done();
     });
 
@@ -28,7 +28,13 @@ describe('Running users unit test', function () {
                     .expect(function (res) {
                         expect(res.header['location']).to.match(/\/login/);
                     })
-                    .expect(302, done);
+                    .expect(302)
+                    .end(function (err, res) {
+                        if (err) {
+                            return done(err);
+                        }
+                        done();
+                    });
             });
 
             it('GET /users should lead to /login page', function (done) {
@@ -37,15 +43,26 @@ describe('Running users unit test', function () {
                     .expect(function (res) {
                         expect(res.header['location']).to.match(/\/login/);
                     })
-                    .expect(302, done)
+                    .end(function (err, res) {
+                        if (err) {
+                            return done(err);
+                        }
+                        done();
+                    });
             });
+
             it('GET /collections should lead to /login page', function (done) {
                 request(app)
                     .get('/collections')
                     .expect(function (res) {
                         expect(res.header['location']).to.match(/\/login/);
                     })
-                    .expect(302, done)
+                    .end(function (err, res) {
+                        if (err) {
+                            return done(err);
+                        }
+                        done();
+                    });
             });
         });
 
@@ -53,77 +70,66 @@ describe('Running users unit test', function () {
             it('should return 401 when wrong username/password is used', function (done) {
                 request(app)
                     .post('/login/local')
-                    .send('username=testNamePutX')
-                    .send('password=123qweQweX')
+                    .send('username=testNamePut')
+                    .send('password=123qweQwe')
                     .expect(401, done);
             });
+
             it('should return 400 when username is left empty', function (done) {
                 request(app)
-                    .post('/login/local')
-                    .send('username=')
-                    .send('password=qwe123QWE')
+                    .post("/login/local")
+                    .send("username=")
+                    .send("password=qwe123QWE")
                     .expect(400, done);
             });
+
             it('should return 400 when password is left empty', function (done) {
                 request(app)
-                    .post('/login/local')
-                    .send('username=testName')
-                    .send('password=')
+                    .post("/login/local")
+                    .send("username=testName")
+                    .send("password=")
                     .expect(400, done);
             });
         });
     });
 
+
     describe('Authenticated userTest', function () {
         var token;
+
         before(function adminLoginAuth(done) {
             request(app)
-                .post('/login/local')
+                .post("/login/local")
                 .type('form')
-                .send('username=testNamePut')
-                .send('password=qwe123QWE')
+                .send("username=testNamePut")
+                .send("password=qwe123QWE")
                 .set('Accept', 'application/json')
                 .expect(function (res) {
                     should.exist(res.body.token);
                     token = res.body.token;
                 })
-                .expect(200, done);
+                .end(done);
         });
 
         describe('Authenticating bearer tokens', function () {
-            it('should return bearer token not authenticated', function(done) {
-                request(app)
-                    .get('/login/local')
-                    .set('authorization', 'bearer 1' + token)
-                    .expect('Content-Type', /json/)
-                    .expect(function(res) {
-                        expect(res.body.message).to.match(/^.*not authenticated.*$/);
-                        should.exist(res.body.remedy);
-                    })
-                    .expect(200, done);
+
+
+        });
+
+        describe('HTTP requests', function () {
+            describe('GET /', function () {
+                it('should respond with hal format\n', function (done) {
+                    request(app)
+                        .get('/')
+                        .set('authorization', 'bearer ' + token)
+                        .expect('Content-Type', /json/)
+                        .expect(function (res) {
+                            res.body._links["self"] = "/";
+                        })
+                        .expect(200, done);
+                });
             });
-            it('should return add bearer string', function(done) {
-                request(app)
-                    .get('/login/local')
-                    .set('authorization', token)
-                    .expect('Content-Type', /json/)
-                    .expect(function(res) {
-                        expect(res.body.message).to.match(/^.*bearer.*$/);
-                    })
-                    .expect(200, done);
-            });
-            it('should return authenticated', function (done) {
-               request(app)
-                   .get('/login/local')
-                   .set('authorization', 'bearer ' + token)
-                   .expect('Content-Type', /json/)
-                   .expect(function(res) {
-                       res.body.message.should.equal("You are authenticated.");
-                       should.exist(res.body.user.tokenStartTime);
-                       should.exist(res.body.user.tokenEndTime);
-                   })
-                   .expect(200, done);
-            });
+
         });
 
         describe('GET /users non-admin', function () {
@@ -131,9 +137,9 @@ describe('Running users unit test', function () {
 
             before(function nonAdminLoginAuth(done) {
                 request(app)
-                    .post('/login/local')
-                    .send('username=testName')
-                    .send('password=qwe123QWE')
+                    .post("/login/local")
+                    .send("username=testName")
+                    .send("password=qwe123QWE")
                     .expect(function (res) {
                         should.exist(res.body.token);
                         tokenNonAdmin = res.body.token;
@@ -162,46 +168,17 @@ describe('Running users unit test', function () {
         });
 
         describe('POST /users', function () {
-            it('should return Missing username', function (done) {
-                request(app)
-                    .post('/users')
-                    .set('authorization', 'bearer ' + token)
-                    .type('json')
-                    .send({
-                        username: ''
-                    })
-                    .expect(function (res) {
-                        res.body.message.should.equal('Missing username');
-                        should.exist(res.body.remedy);
-                    })
-                    .expect(400, done);
-            });
-            it('should return Missing password', function (done) {
-                request(app)
-                    .post('/users')
-                    .set('authorization', 'bearer ' + token)
-                    .type('json')
-                    .send({
-                        username: 'testName'
-                    })
-                    .expect(function (res) {
-                        res.body.message.should.equal('Missing password');
-                        should.exist(res.body.remedy);
-                    })
-                    .expect(400, done);
-            });
             it('should return Password is of invalid format if failed', function (done) {
                 request(app)
                     .post('/users')
                     .set('authorization', 'bearer ' + token)
                     .type('json')
                     .send({
-                        username: 'testName',
-                        password: '123qwe'
+                        username: "testName",
+                        password: "123qwe"
                     })
                     .expect(function (res) {
-                        res.body.message.should.equal('Invalid Password Format');
-                        should.exist(res.body.remedy);
+                        res.body.message.should.equal("Password is of invalid format.");
                     })
                     .expect(400, done);
             });
@@ -211,10 +188,9 @@ describe('Running users unit test', function () {
                     .set('authorization', 'bearer ' + token)
                     .type('json')
                     .send({
-                        username: 'testNameX',
-                        password: 'test123TEST',
-                        phoneNumber: 12345678,
-                        isAdmin: false
+                        username: "testNameX",
+                        password: "test123TEST",
+                        phoneNumber: 12345678
                     })
                     .expect(201, done);
             });
@@ -222,7 +198,7 @@ describe('Running users unit test', function () {
 
         describe('GET /users/:id', function () {
             it('should respond with posted user\n', function (done) {
-                userIdQuery('testNameX', function (err, _id) {
+                userIdQuery("testNameX", function (err, _id) {
                     if (err) {
                         return done(err);
                     } else {
@@ -231,9 +207,10 @@ describe('Running users unit test', function () {
                             .set('authorization', 'bearer ' + token)
                             .expect('Content-Type', /json/)
                             .expect(function (res) {
-                                res.body.user.username.should.equal('testNameX', 'userName is wrong');
-                                res.body.user.phoneNumber.should.equal(12345678, 'phoneNumber is wrong');
-                                res.body.user.password.should.equal(Util.encryptPassword('test123TEST'), 'password is wrong');
+                                // console.log(res);
+                                res.body.user.username.should.equal("testNameX", "userName is wrong");
+                                res.body.user.phoneNumber.should.equal(12345678, "phoneNumber is wrong");
+                                res.body.user.password.should.equal(Util.encryptPassword("test123TEST"), "password is wrong");
                             })
                             .expect(200, done);
                     }
@@ -242,14 +219,14 @@ describe('Running users unit test', function () {
 
             it('should return a status of 204 when a non-existing individual user is requested', function (done) {
                 request(app)
-                    .get('/users/' + '57bc4d605a3daf042376f97d')
+                    .get('/users/' + "57bc4d605a3daf042376f97d")
                     .set('authorization', 'bearer ' + token)
                     .expect(204, done);
             });
 
             it('should return a bad request for user with status 400', function (done) {
                 request(app)
-                    .get('/users/' + '1fewjiofj2wefwe')
+                    .get('/users/' + "1fewjiofj2wefwe")
                     .set('authorization', 'bearer ' + token)
                     .expect(400, done);
             });
@@ -257,7 +234,7 @@ describe('Running users unit test', function () {
 
         describe('PUT /users', function () {
             it('should update the posted user\n', function (done) {
-                userIdQuery('testNamePut', function (err, _id) {
+                userIdQuery("testNamePut", function (err, _id) {
                     if (err) {
                         return done(err);
                     } else {
@@ -266,13 +243,13 @@ describe('Running users unit test', function () {
                             .set('authorization', 'bearer ' + token)
                             .type('json')
                             .send({
-                                username: 'Felicia',
+                                username: "Felicia",
                                 phoneNumber: 99998888
                             })
                             .expect('Content-Type', /json/)
                             .expect(function (res) {
-                                res.body.user.username.should.equal('Felicia', 'userName is wrong');
-                                res.body.user.phoneNumber.should.equal(99998888, 'phoneNumber is wrong');
+                                res.body.user.username.should.equal("Felicia", "userName is wrong");
+                                res.body.user.phoneNumber.should.equal(99998888, "phoneNumber is wrong");
                             })
                             .expect(200, done);
                     }
@@ -281,14 +258,14 @@ describe('Running users unit test', function () {
 
             it('should return a status of 204 when a non-existing individual user is requested', function (done) {
                 request(app)
-                    .put('/users/' + '57bc4d605a3daf042376f97d')
+                    .put('/users/' + "57bc4d605a3daf042376f97d")
                     .set('authorization', 'bearer ' + token)
                     .expect(204, done);
             });
 
             it('should return a bad request for user with status 400', function (done) {
                 request(app)
-                    .put('/users/' + '1fewjiofj2wefwe')
+                    .put('/users/' + "1fewjiofj2wefwe")
                     .set('authorization', 'bearer ' + token)
                     .expect(400, done);
             });
@@ -298,7 +275,7 @@ describe('Running users unit test', function () {
         describe('DELETE /users/:id', function () {
             var deletedId;
             it('should delete the posted users', function (done) {
-                userIdQuery('testNameDelete', function (err, data) {
+                userIdQuery("testNameDelete", function (err, data) {
                     if (err) {
                         return done(err);
                     } else {
@@ -313,7 +290,7 @@ describe('Running users unit test', function () {
 
             after(function () {
                 it('should not be able to GET the user\n', function (done) {
-                    userIdQuery('testNameDelete', function (err, data) {
+                    userIdQuery("testNameDelete", function (err, data) {
                         if (err) {
                             return done(err);
                         } else {
@@ -334,14 +311,14 @@ describe('Running users unit test', function () {
      */
     function userIdQuery(_username, callback) {
         db.collection('users').findOne({username: _username}, function (err, user) {
-            if (err) {
-                callback(err, null);
-            } else if (user == null) {
-                callback(null, null);
-            } else {
-                callback(null, user._id);
-            }
-        });
+                if (err) {
+                    callback(err, null);
+                } else if (user == null) {
+                    callback(null, null);
+                } else {
+                    callback(null, user._id);
+                }
+            });
     }
 
 });

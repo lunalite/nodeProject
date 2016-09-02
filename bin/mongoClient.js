@@ -12,6 +12,8 @@ module.exports = {
         MongoClient.connect(config.db, function( err, db ) {
             _db = db;
             console.log('Connected to the database: ' + config.db);
+            // Logger.setLevel('debug');
+            // Logger.filter('class', ['Db']);
             return callback( err );
         } );
     },

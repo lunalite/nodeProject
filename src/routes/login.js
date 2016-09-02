@@ -10,7 +10,7 @@ var db = mongoClient.getDb();
 
 router.get('/', function (req, res, next) {
     res.json({
-        message: 'Please log in through the local page',
+        Message: 'Please log in through the local page',
         _links: {
             self: {href: req.originalUrl},
             next: {href: '/login/local'},
@@ -29,11 +29,7 @@ router.get('/local', function (req, res, next) {
                     next(err);
                 } else if (!user) {
                     return res.json({
-                        message: 'bearer token is not authenticated. Please try again.',
-                        remedy: {
-                            1: "Double check the token you have copied.",
-                            2: "Login again via POST /login/local"
-                        }
+                        Message: 'bearer token is not authenticated. Please try again.'
                     });
                 } else {
                     jwt.verify(secondCheck[1], config.secret, function (err, decoded) {
@@ -41,7 +37,7 @@ router.get('/local', function (req, res, next) {
                             return next(err, {message: 'Expired jwt'});
                         } else {
                             return res.json({
-                                message: 'You are authenticated.',
+                                Message: 'You are authenticated.',
                                 user: {
                                     _id: decoded._id,
                                     username: decoded.username,
@@ -57,12 +53,12 @@ router.get('/local', function (req, res, next) {
             });
         } else {
             return res.json({
-                message: 'Please enter "bearer" in front of your token'
+                Message: 'Please enter "bearer" in front of your token'
             });
         }
     } else {
         res.json({
-            message: 'Please log in with POST request',
+            Message: 'Please log in with POST request',
             formType: 'x-www-form-urlencoded',
             username: 'Your username',
             password: 'Your password',
@@ -105,21 +101,17 @@ router.post('/local',
                         if (err) {
                             res.status(204).send();
                         } else {
-                            res.send({
+                            res.json({
+                                _links: {
+                                    self: {href: req.originalUrl},
+                                    next: {href: '/'}
+                                },
                                 token: token,
                                 expiresIn: config.jwtExpiryTime,
                                 message: 'Please use token as bearer for authentication purposes by passing it' +
                                 ' in the header with key value "Authorization"',
                                 authentication: 'Send a GET request to /login/local with bearer token to authenticate if' +
-                                ' token is right',
-                                _links: {
-                                    self: {href: req.originalUrl},
-                                    authenticateToken: {
-                                        href: '/login/local',
-                                        method: 'GET'
-                                    },
-                                    pagesToVisit: {href: '/'}
-                                }
+                                ' token is right'
                             });
                         }
                     });

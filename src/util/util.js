@@ -83,6 +83,7 @@ module.exports.validateMongo_ID = function (req, res, next) {
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
         return next();
     } else {
+        console.log(req);
         res.status(400).send({
             message: 'Please enter a valid _id',
             _links: {

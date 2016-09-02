@@ -30,9 +30,9 @@ describe('Starting Unit tests', function () {
         });
 
         function createUser(done) {
-            var userArray = [new User("testName", "qwe123QWE", 11111111, false),
-                new User("testNamePut", "qwe123QWE", 11223344, true),
-                new User("testNameDelete", "qwe123QWE", 22331122, true)];
+            var userArray = [new User("testName", Utils.encryptPassword("qwe123QWE"), 11111111, false),
+                new User("testNamePut", Utils.encryptPassword("qwe123QWE"), 11223344, true),
+                new User("testNameDelete", Utils.encryptPassword("qwe123QWE"), 22331122, true)];
             for (var i = 0; i < userArray.length; i++) {
                 userArray[i].insertOne(db, function (err, user) {
                     if (err) {
