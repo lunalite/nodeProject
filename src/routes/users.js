@@ -91,38 +91,20 @@ router.get('/:id', Util.validateMongo_ID, function (req, res, next) {
  *  }
  */
 router.post('/', function (req, res, next) {
-    var passwordFromReq = req.body.password;
-    var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-    var passwordCheck = passwordRegex.exec(passwordFromReq);
-    if (!passwordCheck) {
-        return res.status(400).send({
-            message: 'Password is of invalid format.',
-            Requirement: 'At least 8 characters; At least 1 numerical, 1 small letter, 1 capital letter',
-            _links: {
-                self: {
-                    href: '/users/'
-                },
-                back: {
-                    href: '/'
-                }
-            }
-        });
-    } else {
-        var user = new User(
-            req.body.username,
-            Util.encryptPassword(passwordFromReq),
-            req.body.phoneNumber,
-            req.body.isAdmin ? req.body.isAdmin : false);
+    var user = new User(
+        req.body.username,
+        req.body.password,
+        req.body.phoneNumber,
+        req.body.isAdmin);
 
-        user.insertOne(function (err, result) {
-            if (err) {
-                res.status(400).send(err);
-            }
-            res.status(201).send({
-                user: result.value
-            });
+    user.insertOne(function (err, result) {
+        if (err) {
+            next(err);
+        }
+        res.status(201).send({
+            user: result.value
         });
-    }
+    });
 });
 
 
