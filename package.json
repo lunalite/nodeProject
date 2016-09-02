@@ -1,7 +1,13 @@
 {
   "name": "nodeProject",
-  "version": "0.0.0",
+  "version": "1.9.3",
+  "description": "A node API that could be extended for any possible collections",
+  "bin": "./bin/www",
   "private": true,
+  "author": {
+    "name": "Hong",
+    "email": "hd.koh290293@gmail.com"
+  },
   "scripts": {
     "start": "node ./bin/www",
     "test": "istanbul cover ./node_modules/mocha/bin/_mocha"
@@ -9,7 +15,6 @@
   "dependencies": {
     "assert": "^1.4.1",
     "body-parser": "~1.15.1",
-    "connect-ensure-login": "^0.1.1",
     "cookie-parser": "~1.4.3",
     "express": "~4.13.4",
     "express-session": "^1.14.0",

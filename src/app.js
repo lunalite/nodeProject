@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express');
+var errorHandler = require('./handler/errorHandler');
 var morgan = require('morgan');
 var session = require('express-session');
 var config = require('./../config');
@@ -42,27 +43,8 @@ app.use(morgan('dev'));
  */
 app.use('/', routes);
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
-});
 
-// error handlers
-
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-    app.use(function (err, req, res, next) {
-        //debug(err.stack);
-        res.status(err.status || 500);
-        res.json({
-            message: err.message,
-            error: {}
-        });
-    });
-}
+app.use('/', errorHandler.pageErrHandler, errorHandler.devErrHandler);
 
 
 module.exports = app;
