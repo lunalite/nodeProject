@@ -11,7 +11,7 @@ var Collection = require('../../model/CollectionSchema');
 describe('Running collections unit test', function () {
 
     before(function (done) {
-        app = require('../../app');
+        app = require('../../src/app');
         db = require('../../bin/mongoClient').getDb();
 
         var collectionArray = [new Collection('testProd', 'This is a test production'),

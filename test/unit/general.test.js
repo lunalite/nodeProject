@@ -6,7 +6,7 @@ var app;
 
 describe('GET /nonExistentPages', function () {
     before(function(done) {
-        app = require('../../app');
+        app = require('../../src/app');
         done();
     });
 

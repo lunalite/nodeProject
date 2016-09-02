@@ -4,16 +4,18 @@ var mongoClient = require('../../bin/mongoClient');
 var db = mongoClient.getDb();
 var express = require('express');
 var router = express.Router();
-var isLoggedIn = require('./../handler/sessionHandler').isLoggedInMiddleware;
 var Collection = require('../../model/CollectionSchema');
 var Util = require('../util/util');
 
-router.use('/', isLoggedIn, function (req, res, next) {
-    next();
-});
-
-
-/* GET Collections listing. */
+/**
+ * GET /collections{page, limit, offset}
+ * GET collections listing
+ *
+ * @params =
+ *  page: defines page {optional}
+ *  limit: defines resources shown per page {optional}
+ *  offset: defines offset from the first resource stored in dB {optional}
+ */
 router.get('/', function (req, res, next) {
     var limit = parseInt(req.query.limit ? req.query.limit : 10, 10);
     var page = parseInt(req.query.page ? req.query.page : 1, 10);
@@ -49,21 +51,16 @@ router.get('/', function (req, res, next) {
     }
 });
 
-router.use('/:id', function (req, res, next) {
-    if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-        return next();
-    } else {
-        res.status(400).send({
-            message: 'Please enter a valid _id',
-            _links: {
-                self: {href: req.originalUrl},
-                back: {href: '/collections/'}
-            }
-        });
-    }
-});
-
-router.get('/:id', function (req, res, next) {
+/**
+ * GET /collections/:id
+ * Get individual collection data
+ *
+ * @return:
+ * status 200: Successful response of a collection
+ * status 204: No context - no such resource is available
+ * status 400: Bad request - invalid _id format
+ */
+router.get('/:id', Util.validateMongo_ID, function (req, res, next) {
     db.collection('collections').findOne({_id: mongoClient.objectifyId(req.params.id)},
         function (err, collection) {
             if (err) {
@@ -80,6 +77,17 @@ router.get('/:id', function (req, res, next) {
         });
 });
 
+
+/**
+ * POST /collections
+ * Post and create a new collection
+ *
+ * @format =
+ *  {
+ *      "name": XXX,            {required}
+ *      "description": XXX      {optional}
+ *  }
+ */
 router.post('/', function (req, res, next) {
 
     //TODO: Add parser check for name
@@ -100,7 +108,17 @@ router.post('/', function (req, res, next) {
     });
 });
 
-router.put('/:id', function (req, res, next) {
+/**
+ * PUT /collections/:id
+ * Update a collections that is already present
+ *
+ * @format =
+ *  {
+ *      "name": XXX,            {optional}
+ *      "description": XXX      {optional}
+ *  }
+ */
+router.put('/:id', Util.validateMongo_ID, function (req, res, next) {
     db.collection('collections').findOne({_id: mongoClient.objectifyId(req.params.id)},
         function (err, collection) {
             if (err) {
@@ -134,7 +152,15 @@ router.put('/:id', function (req, res, next) {
         });
 });
 
-router.delete('/:id', function (req, res, next) {
+/**
+ * DELETE /collections/:id
+ * Delete the specified collection by its :id
+ *
+ * @return:
+ *  status 204: Successfully deleted
+ *  status 400: Invalid _id
+ */
+router.delete('/:id', Util.validateMongo_ID, function (req, res, next) {
     db.collection('collections').findOneAndDelete({_id: mongoClient.objectifyId(req.params.id)},
         function (err, collection) {
             if (err) {

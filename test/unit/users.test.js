@@ -15,7 +15,7 @@ var Util = require('../../src/util/util');
 
 describe('Running users unit test', function () {
     before(function (done) {
-        app = require('../../app');
+        app = require('../../src/app');
         db = require('../../bin/mongoClient').getDb()
         done();
     });

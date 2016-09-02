@@ -17,7 +17,7 @@ mongoClient.connectToServer(function (err) {
     /**
      * Get port from environment and store in Express.
      */
-    var app = require('../app');
+    var app = require('../src/app');
     var http = require('http');
 
     var port = normalizePort(config.port);
