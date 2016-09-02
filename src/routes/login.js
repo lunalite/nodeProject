@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var express = require('express');
 var router = express.Router();
@@ -10,36 +10,34 @@ var db = mongoClient.getDb();
 
 router.get('/', function (req, res, next) {
     res.json({
-        Message: "Please log in through the local page",
+        Message: 'Please log in through the local page',
         _links: {
             self: {href: req.originalUrl},
-            next: {href: "/login/local"},
-            back: {href: "/"}
+            next: {href: '/login/local'},
+            back: {href: '/'}
         }
     });
 });
 
 router.get('/local', function (req, res, next) {
-    if (req.header("authorization")) {
+    if (req.header('authorization')) {
         var regex = /bearer /;
-        var secondCheck = req.header("authorization").split(regex);
+        var secondCheck = req.header('authorization').split(regex);
         if (secondCheck[1]) {
             db.collection('users').findOne({token: secondCheck[1]}, function (err, user) {
-                // console.log(secondCheck[1]);
-                // console.log(user);
                 if (err) {
                     next(err);
                 } else if (!user) {
                     return res.json({
-                        Message: "bearer token is not authenticated. Please try again."
+                        Message: 'bearer token is not authenticated. Please try again.'
                     });
                 } else {
                     jwt.verify(secondCheck[1], config.secret, function (err, decoded) {
                         if (err) {
-                            return next(err, {message: "Expired jwt"});
+                            return next(err, {message: 'Expired jwt'});
                         } else {
                             return res.json({
-                                Message: "You are authenticated.",
+                                Message: 'You are authenticated.',
                                 user: {
                                     _id: decoded._id,
                                     username: decoded.username,
@@ -55,15 +53,15 @@ router.get('/local', function (req, res, next) {
             });
         } else {
             return res.json({
-                Message: "Please enter 'bearer ' in front of your token"
+                Message: 'Please enter "bearer" in front of your token'
             });
         }
     } else {
         res.json({
-            Message: "Please log in with POST request",
-            formType: "x-www-form-urlencoded",
-            username: "Your username",
-            password: "Your password",
+            Message: 'Please log in with POST request',
+            formType: 'x-www-form-urlencoded',
+            username: 'Your username',
+            password: 'Your password',
             _links: {
                 self: {href: req.originalUrl}
             }
@@ -106,14 +104,14 @@ router.post('/local',
                             res.json({
                                 _links: {
                                     self: {href: req.originalUrl},
-                                    next: {href: "/"}
+                                    next: {href: '/'}
                                 },
                                 token: token,
                                 expiresIn: config.jwtExpiryTime,
-                                message: "Please use token as bearer for authentication purposes by passing it" +
-                                " in the header with key value 'Authorization'",
-                                authentication: "Send a GET request to /login/local with bearer token to authenticate if" +
-                                " token is right"
+                                message: 'Please use token as bearer for authentication purposes by passing it' +
+                                ' in the header with key value "Authorization"',
+                                authentication: 'Send a GET request to /login/local with bearer token to authenticate if' +
+                                ' token is right'
                             });
                         }
                     });

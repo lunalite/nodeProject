@@ -28,7 +28,7 @@ UserSchema.prototype.validate = function () {
 };
 
 UserSchema.prototype.insertOne = function (database, callback) {
-    if (typeof(database) != 'function') {
+    if (typeof(database) !== 'function') {
         db = database;
     } else {
         callback = database;
@@ -50,7 +50,6 @@ UserSchema.prototype.insertOne = function (database, callback) {
                         return callback(err, null);
 
                     } else {
-                        // console.log(result);
                         return callback(null, result, user.ops[0]._id);
                     }
                 }

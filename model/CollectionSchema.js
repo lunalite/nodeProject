@@ -25,7 +25,7 @@ CollectionSchema.prototype.validate = function () {
 };
 
 CollectionSchema.prototype.insertOne = function (database, callback) {
-    if (typeof(database) != 'function') {
+    if (typeof(database) !== 'function') {
         db = database;
     } else {
         callback = database;
@@ -38,10 +38,15 @@ CollectionSchema.prototype.insertOne = function (database, callback) {
         .then(function (collection) {
             db.collection('collections').findOneAndUpdate(
                 {_id: collection.ops[0]._id},
-                {$set: {_links: {
-                    timeCreated: Date.now(),
-                    lastUpdated: Date.now(),
-                    self: {href: "/collections/" + collection.ops[0]._id}}}},
+                {
+                    $set: {
+                        timeCreated: Date.now(),
+                        lastUpdated: Date.now(),
+                        _links: {
+                            self: {href: "/collections/" + collection.ops[0]._id}
+                        }
+                    }
+                },
                 {returnOriginal: false},
                 function (err, result) {
                     if (err) {

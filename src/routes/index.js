@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var express = require('express');
 var router = express.Router();
@@ -9,8 +9,8 @@ router.get('/', isLoggedIn, function (req, res, next) {
     res.json({
         _links: {
             self: {href: req.originalUrl},
-            users: {href: "/users"},
-            collections: {href: "/login"}
+            users: {href: '/users'},
+            collections: {href: '/login'}
         }
     });
 });

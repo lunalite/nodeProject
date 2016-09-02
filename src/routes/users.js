@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var mongoClient = require('../../bin/mongoClient');
 var db = mongoClient.getDb();
@@ -21,20 +21,6 @@ router.get('/', function (req, res, next) {
     var offset = parseInt(req.query.offset ? req.query.offset : 0, 10);
     var totalOffset = offset + limit * (page - 1);
 
-    var pageQueryShow = function (pageOrder) {
-        if (pageOrder == "next") {
-            return req.query.page ? "page=" + (page + 1) : "page=2";
-        } else {
-            return req.query.page ? "page=" + (page - 1) : "";
-        }
-    };
-    var limitQueryShow = function (qualifier) {
-        return req.query.limit ? qualifier + "limit=" + limit : "";
-    };
-    var offsetQueryShow = function (qualifier) {
-        return req.query.offset ? qualifier + "offset=" + offset : "";
-    };
-
     db.collection('users').count({}, function (err, totalCount) {
         if (err) {
             return next(err);
@@ -49,36 +35,14 @@ router.get('/', function (req, res, next) {
                 res.status(204).send(err);
             } else {
                 res.send({
-                    _links: {
-                        self: {href: req.originalUrl},
-                        first: {
-                            href: lastPage > 0 ? "/users?page=1" + limitQueryShow("&") + offsetQueryShow("&") : ""
-                        },
-                        next: {
-                            href: (page >= lastPage) ? "" : ("/users?" + (
-                                req.query.page ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
-                                    req.query.limit ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
-                                        req.query.offset ? pageQueryShow("next") + offsetQueryShow("&") : ""))
-                        },
-                        previous: {
-                            href: (page <= 1 || page > lastPage) ? "" : ("/users?" + (
-                                req.query.page ? pageQueryShow("previous") + limitQueryShow("&") + offsetQueryShow("&") :
-                                    req.query.limit ? pageQueryShow("previous") + limitQueryShow("&") + offsetQueryShow("&") :
-                                        req.query.offset ? pageQueryShow("previous") + offsetQueryShow("&") : ""))
-                        },
-                        last: {
-                            href: lastPage > 0 ? "/users?page=" + lastPage + limitQueryShow("&") + offsetQueryShow("&") : ""
-                        },
-                        // TODO: implement find function
-                        find: {href: ""}
-                    },
                     countPerPage: limit ? users.length : limit,
                     totalCount: totalCount,
                     page: page,
                     _embedded: {
                         users: users
+                    },
+                    _links: Util.getLink('users', req, page, limit, offset, lastPage)
 
-                    }
                 });
             }
         });
@@ -113,14 +77,14 @@ router.post('/', function (req, res, next) {
     var passwordCheck = passwordRegex.exec(passwordFromReq);
     if (!passwordCheck) {
         return res.status(400).send({
-            message: "Password is of invalid format.",
-            Requirement: "At least 8 characters; At least 1 numerical, 1 small letter, 1 capital letter",
+            message: 'Password is of invalid format.',
+            Requirement: 'At least 8 characters; At least 1 numerical, 1 small letter, 1 capital letter',
             _links: {
                 self: {
-                    href: "/users/"
+                    href: '/users/'
                 },
                 back: {
-                    href: "/"
+                    href: '/'
                 }
             }
         });
@@ -198,13 +162,13 @@ router.delete('/:id', function (req, res, next) {
 
 function enterValidId(req, res) {
     res.status(400).send({
-        message: "Please enter a valid _id",
+        message: 'Please enter a valid _id',
         _links: {
             self: {
-                href: "/users/" + req.params.id
+                href: '/users/' + req.params.id
             },
             back: {
-                href: "/users/"
+                href: '/users/'
             }
         }
     });

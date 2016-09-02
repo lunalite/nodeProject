@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
 var mongoClient = require('../../bin/mongoClient');
 var db = mongoClient.getDb();
 var express = require('express');
 var router = express.Router();
 var isLoggedIn = require('./../handler/sessionHandler').isLoggedInMiddleware;
-var isAdmin = require('./../handler/sessionHandler').isAdminMiddleware;
 var Collection = require('../../model/CollectionSchema');
+var Util = require('../util/util');
 
 router.use('/', isLoggedIn, function (req, res, next) {
     next();
@@ -20,19 +20,7 @@ router.get('/', function (req, res, next) {
     var offset = parseInt(req.query.offset ? req.query.offset : 0, 10);
     var totalOffset = offset + limit * (page - 1);
 
-    var pageQueryShow = function (pageOrder) {
-        if (pageOrder == "next") {
-            return req.query.page ? "page=" + (page + 1) : "page=2";
-        } else {
-            return req.query.page ? "page=" + (page - 1) : "";
-        }
-    };
-    var limitQueryShow = function (qualifier) {
-        return req.query.limit ? qualifier + "limit=" + limit : "";
-    };
-    var offsetQueryShow = function (qualifier) {
-        return req.query.offset ? qualifier + "offset=" + offset : "";
-    };
+
 
     db.collection('collections').count({}, function (err, totalCount) {
         if (err) {
@@ -48,36 +36,13 @@ router.get('/', function (req, res, next) {
                 return next(err);
             } else {
                 res.send({
-                    _links: {
-                        self: {href: req.originalUrl},
-                        first: {
-                            href: lastPage > 0 ? "/collections?page=1" + limitQueryShow("&") + offsetQueryShow("&") : ""
-                        },
-                        next: {
-                            href: (page >= lastPage) ? "" : ("/collections?" + (
-                                req.query.page ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
-                                    req.query.limit ? pageQueryShow("next") + limitQueryShow("&") + offsetQueryShow("&") :
-                                        req.query.offset ? pageQueryShow("next") + offsetQueryShow("&") :
-                                            pageQueryShow("next")))
-                        },
-                        previous: {
-                            href: (page <= 1 || page > lastPage) ? "" : ("/collections?" + (
-                                req.query.page ? pageQueryShow("previous") + limitQueryShow("&") + offsetQueryShow("&") :
-                                    req.query.limit ? pageQueryShow("previous") + limitQueryShow("&") + offsetQueryShow("&") :
-                                        req.query.offset ? pageQueryShow("previous") + offsetQueryShow("&") : ""))
-                        },
-                        last: {
-                            href: lastPage > 0 ? "/collections?page=" + lastPage + limitQueryShow("&") + offsetQueryShow("&") : ""
-                        },
-                        // TODO: implement find function
-                        find: {href: "/collections?"}
-                    },
                     countPerPage: limit ? collections.length : limit,
                     totalCount: totalCount,
                     page: page,
                     _embedded: {
                         collection: collections
-                    }
+                    },
+                    _links: Util.getLink('collections', req, page, limit, offset, lastPage)
                 });
             }
         });
@@ -89,10 +54,10 @@ router.use('/:id', function (req, res, next) {
         return next();
     } else {
         res.status(400).send({
-            message: "Please enter a valid _id",
+            message: 'Please enter a valid _id',
             _links: {
                 self: {href: req.originalUrl},
-                back: {href: "/collections/"}
+                back: {href: '/collections/'}
             }
         });
     }
@@ -120,7 +85,7 @@ router.post('/', function (req, res, next) {
     //TODO: Add parser check for name
     var collection = new Collection(
         req.body.name,
-        req.body.description ? req.body.description : ""
+        req.body.description ? req.body.description : ''
     );
     collection.insertOne(function (err, result) {
         if (err) {

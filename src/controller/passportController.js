@@ -19,7 +19,7 @@ passport.use(new LocalStrategy({
             if (!user) {
                 return done(null, false, {message: 'Incorrect username.'});
             }
-            if ((Utils.decryptPassword(user.password)) != password) {
+            if ((Utils.decryptPassword(user.password)) !== password) {
                 return done(null, false, {message: 'Incorrect password.'});
             }
 
@@ -37,7 +37,7 @@ passport.use(new BearerStrategy(
             if (!user) {
                 return done(null, false);
             }
-            jwt.verify(token, config.secret, function (err, decoded) {
+            jwt.verify(token, config.secret, function (err) {
                 if (err) {
                     return done(null, false, {message: 'Expired jwt'});
                 } else {

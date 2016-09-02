@@ -12,6 +12,9 @@ SessionHandler.prototype.isLoggedInMiddleware = passport.authenticate('bearer', 
 
 SessionHandler.prototype.isAdminMiddleware = function (req, res, next) {
     db.collection('users').findOne({username: req.user.username}, function (err, user) {
+        if (err) {
+            return next(err);
+        }
         if (user.isAdmin) {
             return next();
         } else {

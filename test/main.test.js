@@ -23,16 +23,13 @@ describe('Starting Unit tests', function () {
             console.log('connected to mongoDB\n');
             db = mongoClient.getDb();
             db.createCollection('users', function () {
-                // console.log('creating collection("users")...');
                 db.createCollection('collections', function () {
-                    // console.log('creating collection("collections")...');
                     createUser(done);
                 });
             });
         });
 
         function createUser(done) {
-            // console.log('creating users...');
             var userArray = [new User("testName", Utils.encryptPassword("qwe123QWE"), 11111111, false),
                 new User("testNamePut", Utils.encryptPassword("qwe123QWE"), 11223344, true),
                 new User("testNameDelete", Utils.encryptPassword("qwe123QWE"), 22331122, true)];
@@ -60,7 +57,7 @@ describe('Starting Unit tests', function () {
                 if (err) {
                     return done(err);
                 }
-                console.log('end of tests... Closing db');
+                console.log('End of tests... Closing db');
                 db.close();
 
                 return done(null);
