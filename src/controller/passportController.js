@@ -3,24 +3,26 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
-var Users = require('../model/userModel');
+var db = require('../../bin/mongoClient').getDb();
 var jwt = require('jsonwebtoken');
-var config = require('./config');
-var Utils = require('../utils');
+var config = require('./../../config');
+var Utils = require('../util/util');
+
 passport.use(new LocalStrategy({
         passReqToCallback: true
     },
     function (req, username, password, done) {
-        Users.findOne({userName: username}, function (err, user) {
+        db.collection('users').findOne({username: username}, function (err, user) {
             if (err) {
                 return done(err);
             }
             if (!user) {
                 return done(null, false, {message: 'Incorrect username.'});
             }
-            if ((Utils.decryptPassword(user.password)) != password) {
+            if ((Utils.decryptPassword(user.password)) !== password) {
                 return done(null, false, {message: 'Incorrect password.'});
             }
+
             return done(null, user);
         });
     }
@@ -28,16 +30,16 @@ passport.use(new LocalStrategy({
 
 passport.use(new BearerStrategy(
     function (token, done) {
-        Users.findOne({token: token}, function (err, user) {
+        db.collection('users').findOne({token: token}, function (err, user) {
             if (err) {
                 return done(err);
             }
             if (!user) {
                 return done(null, false);
             }
-            jwt.verify(token, config.secret, function (err, decoded) {
+            jwt.verify(token, config.secret, function (err) {
                 if (err) {
-                    return done(null, false, {message: "Expired jwt"});
+                    return done(null, false, {message: 'Expired jwt'});
                 } else {
                     return done(null, user, {scope: 'read'});
                 }
@@ -51,7 +53,7 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (_id, done) {
-    Users.findById(_id, function (err, user) {
+    db.collection('users').findOne({_id: _id}, function (err, user) {
         done(err, user);
     });
 });
